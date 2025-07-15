@@ -23,7 +23,27 @@ func NewUserBotApi(b *bot.Bot) {
 		bot.HandlerTypeMessageText,
 		"/start",
 		bot.MatchTypeExact,
-		StartHandler,
+		api.StartHandler,
+		[]bot.Middleware{
+			// singleFlight,
+			allreadyRegistered,
+		}...,
+	)
+
+	api.b.RegisterHandlerRegexp(
+		bot.HandlerTypeMessageText,
+		user.UserFullNameRegexp,
+		api.FullNameHandler,
+		[]bot.Middleware{
+			// singleFlight,
+			allreadyRegistered,
+		}...,
+	)
+
+	api.b.RegisterHandlerRegexp(
+		bot.HandlerTypeMessageText,
+		user.UserBirthDateRegexp,
+		api.BirthDateHandler,
 		[]bot.Middleware{
 			// singleFlight,
 			allreadyRegistered,
@@ -34,7 +54,7 @@ func NewUserBotApi(b *bot.Bot) {
 		bot.HandlerTypeMessageText,
 		"",
 		bot.MatchTypePrefix,
-		AnyHandler,
+		api.AnyHandler,
 		[]bot.Middleware{
 			// singleFlight,
 			allreadyRegistered,
@@ -53,10 +73,10 @@ func NewUserBotApi(b *bot.Bot) {
 	// )
 }
 
-type MessageHandlerFunc = func(ctx context.Context, b *bot.Bot, update *models.Update)
-
 var TempUserMap = make(map[int64]user.UserToRegiser, 10)
 var RegisteredUsers = make(map[int64]user.UserToRegiser, 10)
+
+type MessageHandlerFunc = func(ctx context.Context, b *bot.Bot, update *models.Update)
 
 var StepsHanders = map[user.RegisterStep]MessageHandlerFunc{
 	user.RegisterStepFullName: func(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -68,60 +88,13 @@ var StepsHanders = map[user.RegisterStep]MessageHandlerFunc{
 
 	user.RegisterStepBirthDate: func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.CallbackQuery.From.ID,
+			ChatID: update.Message.Chat.ID,
 			Text:   "Укажите дату рождения",
 		})
 	},
 }
 
-var SteptsValidation = map[user.RegisterStep]MessageHandlerFunc{
-	user.RegisterStepFullName: func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		from := update.Message.From
-		text := strings.TrimSpace(update.Message.Text)
-
-		cachedUser := TempUserMap[from.ID]
-
-		splitted := strings.Split(text, " ")
-		cachedUser.FirstName = splitted[0]
-		cachedUser.LastName = splitted[1]
-
-		cachedUser.RegisterStep = user.RegisterStepBirthDate
-
-		TempUserMap[from.ID] = cachedUser
-
-		StepsHanders[cachedUser.RegisterStep](ctx, b, update)
-	},
-
-	user.RegisterStepBirthDate: func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		from := update.Message.From
-		text := update.Message.Text
-
-		cachedUser := TempUserMap[from.ID]
-
-		parsed, err := time.Parse("02.01.2006", text)
-		if err != nil {
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   "Некорректный формат. Пожалуйста, используй ДД.ММ.ГГГГ.",
-			})
-			return
-		}
-
-		cachedUser.BirthDate = parsed
-		delete(TempUserMap, from.ID)
-
-		fmt.Println("parsed: ", parsed)
-
-		RegisteredUsers[from.ID] = cachedUser
-
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Регистрация прошла успешно",
-		})
-	},
-}
-
-func StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (e UserBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	from := update.Message.From
 
 	cachedUser, exists := TempUserMap[from.ID]
@@ -134,22 +107,64 @@ func StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	step := cachedUser.RegisterStep
-	fmt.Println("step: ", step)
 
 	StepsHanders[step](ctx, b, update)
 }
 
-func AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (e UserBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	from := update.Message.From
-	user := TempUserMap[from.ID]
+	cachedUser := TempUserMap[from.ID]
 
-	fmt.Println("user: ", dump.Struct(user))
+	fmt.Println("cachedUser: ", dump.Struct(cachedUser))
+	// SteptsValidation[cachedUser.RegisterStep](ctx, b, update)
+}
 
-	SteptsValidation[user.RegisterStep](ctx, b, update)
+func (e UserBotApi) FullNameHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	from := update.Message.From
+	text := strings.TrimSpace(update.Message.Text)
+
+	cachedUser := TempUserMap[from.ID]
+
+	splitted := strings.Split(text, " ")
+	cachedUser.FirstName = splitted[0]
+	cachedUser.LastName = splitted[1]
+
+	cachedUser.RegisterStep = user.RegisterStepBirthDate
+
+	TempUserMap[from.ID] = cachedUser
+
+	StepsHanders[cachedUser.RegisterStep](ctx, b, update)
+}
+
+func (e UserBotApi) BirthDateHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	from := update.Message.From
+	text := update.Message.Text
+
+	cachedUser := TempUserMap[from.ID]
+
+	parsed, err := time.Parse("02.01.2006", text)
+	if err != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Некорректный формат. Пожалуйста, используй ДД.ММ.ГГГГ.",
+		})
+		return
+	}
+
+	cachedUser.BirthDate = parsed
+	delete(TempUserMap, from.ID)
+
+	fmt.Println("parsed: ", parsed)
+
+	RegisteredUsers[from.ID] = cachedUser
+
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: update.Message.Chat.ID,
+		Text:   "Регистрация прошла успешно",
+	})
 }
 
 // middleware
-
 func allreadyRegistered(next bot.HandlerFunc) bot.HandlerFunc {
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		if _, exists := RegisteredUsers[update.Message.From.ID]; exists {
