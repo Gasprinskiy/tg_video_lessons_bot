@@ -1,11 +1,8 @@
-package main
+package bot_api
 
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"os/signal"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,8 +11,48 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
-	"github.com/joho/godotenv"
 )
+
+type UserBotApi struct {
+	b *bot.Bot
+}
+
+func NewUserBotApi(b *bot.Bot) {
+	api := UserBotApi{b}
+
+	api.b.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"/start",
+		bot.MatchTypeExact,
+		StartHandler,
+		[]bot.Middleware{
+			// singleFlight,
+			allreadyRegistered,
+		}...,
+	)
+
+	api.b.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"",
+		bot.MatchTypePrefix,
+		AnyHandler,
+		[]bot.Middleware{
+			// singleFlight,
+			allreadyRegistered,
+		}...,
+	)
+
+	api.b.RegisterHandler(
+		bot.HandlerTypeCallbackQueryData,
+		"level:",
+		bot.MatchTypePrefix,
+		LevelHandler,
+		[]bot.Middleware{
+			// singleFlight,
+			allreadyCallbackQuery,
+		}...,
+	)
+}
 
 type Level int
 
@@ -157,83 +194,6 @@ var SteptsValidation = map[RegisterStep]MessageHandlerFunc{
 			Text:   "Регистрация прошла успешно",
 		})
 	},
-}
-
-func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Panic("Ошибка загрузки .env файла: ", err)
-		return
-	}
-
-	botToken := os.Getenv("BOT_TOKEN")
-
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer cancel()
-
-	b, err := bot.New(botToken)
-	if err != nil {
-		log.Panic("ошибка при чтении токена бота: ", err)
-		return
-	}
-
-	defer b.Close(ctx)
-
-	b.RegisterHandler(
-		bot.HandlerTypeMessageText,
-		"/start",
-		bot.MatchTypeExact,
-		StartHandler,
-		[]bot.Middleware{
-			// singleFlight,
-			allreadyRegistered,
-		}...,
-	)
-	b.RegisterHandler(
-		bot.HandlerTypeMessageText,
-		"",
-		bot.MatchTypePrefix,
-		AnyHandler,
-		[]bot.Middleware{
-			// singleFlight,
-			allreadyRegistered,
-		}...,
-	)
-	b.RegisterHandler(
-		bot.HandlerTypeCallbackQueryData,
-		"level:",
-		bot.MatchTypePrefix,
-		LevelHandler,
-		[]bot.Middleware{
-			// singleFlight,
-			allreadyCallbackQuery,
-		}...,
-	)
-
-	// dateRe := regexp.MustCompile(`^\d{2}\.\d{2}\.\d{4}$`)
-	// b.RegisterHandlerRegexp(
-	// 	bot.HandlerTypeMessageText,
-	// 	dateRe,
-	// 	BirthdayHandler,
-	// 	[]bot.Middleware{
-	// 		// singleFlight,
-	// 		allreadyRegistered,
-	// 	}...,
-	// )
-
-	// nameRe := regexp.MustCompile(`^([А-ЯЁA-Z][а-яёa-z]+) ([А-ЯЁA-Z][а-яёa-z]+)$`)
-	// b.RegisterHandlerRegexp(
-	// 	bot.HandlerTypeMessageText,
-	// 	nameRe,
-	// 	FullNameHandler,
-	// 	[]bot.Middleware{
-	// 		// singleFlight,
-	// 		allreadyRegistered,
-	// 	}...,
-	// )
-
-	b.Start(ctx)
-
 }
 
 func StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
