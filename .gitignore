@@ -1,3 +1,4 @@
 .env
 ./src/.env
 ./redis_data
+src.code-workspace

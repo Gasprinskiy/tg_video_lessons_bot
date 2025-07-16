@@ -100,7 +100,9 @@ func (e UserBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models
 	cachedUser, exists := TempUserMap[from.ID]
 	if !exists {
 		cachedUser = user.UserToRegiser{
-			ID:           from.ID,
+			User: user.User{
+				ID: from.ID,
+			},
 			RegisterStep: user.RegisterStepFullName,
 		}
 		TempUserMap[from.ID] = cachedUser
