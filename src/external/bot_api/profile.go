@@ -3,13 +3,10 @@ package bot_api
 import (
 	"context"
 	"fmt"
-	"strings"
 	"tg_video_lessons_bot/internal/entity/global"
 	"tg_video_lessons_bot/internal/entity/profile"
 	"tg_video_lessons_bot/tools/bot_tool"
-	"tg_video_lessons_bot/tools/dump"
 	"tg_video_lessons_bot/uimport"
-	"time"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -28,30 +25,33 @@ func NewPrfileBotApi(b *bot.Bot, ui *uimport.UsecaseImport) {
 		"/start",
 		bot.MatchTypeExact,
 		api.StartHandler,
-		[]bot.Middleware{
-			// singleFlight,
-			allreadyRegistered,
-		}...,
+		// middleware
+		allreadyRegistered,
 	)
 
 	api.b.RegisterHandlerRegexp(
 		bot.HandlerTypeMessageText,
 		profile.UserFullNameRegexp,
 		api.FullNameHandler,
-		[]bot.Middleware{
-			// singleFlight,
-			allreadyRegistered,
-		}...,
+		// middleware
+		allreadyRegistered,
 	)
 
 	api.b.RegisterHandlerRegexp(
 		bot.HandlerTypeMessageText,
 		profile.UserBirthDateRegexp,
 		api.BirthDateHandler,
-		[]bot.Middleware{
-			// singleFlight,
-			allreadyRegistered,
-		}...,
+		// middleware
+		allreadyRegistered,
+	)
+
+	api.b.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		"",
+		bot.MatchTypeExact,
+		api.AnyHandler,
+		// middleware
+		allreadyRegistered,
 	)
 
 	api.b.RegisterHandler(
@@ -59,10 +59,8 @@ func NewPrfileBotApi(b *bot.Bot, ui *uimport.UsecaseImport) {
 		"",
 		bot.MatchTypePrefix,
 		api.AnyHandler,
-		[]bot.Middleware{
-			// singleFlight,
-			allreadyRegistered,
-		}...,
+		// middleware
+		allreadyRegistered,
 	)
 
 	// api.b.RegisterHandler(
@@ -99,9 +97,7 @@ var StepsHanders = map[profile.RegisterStep]MessageHandlerFunc{
 }
 
 func (e *ProfileBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	from := update.Message.From
-
-	messages, err := e.ui.Usecase.Profile.HandlerStart(ctx, *from)
+	messages, err := e.ui.Usecase.Profile.HandlerStart(ctx, update.Message.From.ID, update.Message.From.Username)
 	if err != nil {
 		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
 		return
@@ -113,56 +109,38 @@ func (e *ProfileBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *mo
 }
 
 func (e *ProfileBotApi) FullNameHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	from := update.Message.From
-	text := strings.TrimSpace(update.Message.Text)
-
-	cachedUser := TempUserMap[from.ID]
-
-	splitted := strings.Split(text, " ")
-	cachedUser.FirstName = splitted[0]
-	cachedUser.LastName = splitted[1]
-
-	cachedUser.RegisterStep = profile.RegisterStepBirthDate
-
-	TempUserMap[from.ID] = cachedUser
-
-	StepsHanders[cachedUser.RegisterStep](ctx, b, update)
-}
-
-func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	from := update.Message.From
-	cachedUser := TempUserMap[from.ID]
-
-	fmt.Println("cachedUser: ", dump.Struct(cachedUser))
-	// SteptsValidation[cachedUser.RegisterStep](ctx, b, update)
-}
-
-func (e *ProfileBotApi) BirthDateHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	from := update.Message.From
-	text := update.Message.Text
-
-	cachedUser := TempUserMap[from.ID]
-
-	parsed, err := time.Parse("02.01.2006", text)
+	message, err := e.ui.Usecase.Profile.HandlerFullName(ctx, update.Message.From.ID, update.Message.Text)
 	if err != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Некорректный формат. Пожалуйста, используй ДД.ММ.ГГГГ.",
-		})
+		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
 		return
 	}
 
-	cachedUser.BirthDate = parsed
-	delete(TempUserMap, from.ID)
+	bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
+}
 
-	fmt.Println("parsed: ", parsed)
+func (e *ProfileBotApi) BirthDateHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	message, err := e.ui.Usecase.Profile.HandleBirthDate(ctx, update.Message.From.ID, update.Message.Text)
+	if err != nil {
+		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
+		return
+	}
 
-	RegisteredUsers[from.ID] = cachedUser
+	bot_tool.SendReplyKeyboardMessage(ctx, b, update, message, false)
+}
 
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   "Регистрация прошла успешно",
-	})
+func (e *ProfileBotApi) PhoneNumberHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	message, err := e.ui.Usecase.Profile.HandlePhoneNumber(ctx, update.Message.From.ID, *update.Message.Contact)
+	if err != nil {
+		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
+		return
+	}
+
+	bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
+}
+
+func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	fmt.Println("update.Message.Text: ", update.Message.Text)
+	// SteptsValidation[cachedUser.RegisterStep](ctx, b, update)
 }
 
 // middleware
