@@ -6,10 +6,12 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"tg_video_lessons_bot/config"
 	"tg_video_lessons_bot/external/bot_api"
+	"tg_video_lessons_bot/rimport"
+	"tg_video_lessons_bot/uimport"
 
 	"github.com/go-telegram/bot"
-	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -19,29 +21,26 @@ func main() {
 	// 	return
 	// }
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
-		Password: os.Getenv("REDIS_PASSWORD"),
-	})
-
-	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
-		log.Panic("ошибка при подключении пинге redis: ", err)
-	}
-
-	defer rdb.Close()
-
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	b, err := bot.New(os.Getenv("BOT_TOKEN"))
+	config := config.NewConfig()
+
+	// инициализация бота
+	b, err := bot.New(config.BotToken)
 	if err != nil {
 		log.Panic("ошибка при чтении токена бота: ", err)
-		return
 	}
-
 	defer b.Close(ctx)
 
-	bot_api.NewUserBotApi(b)
+	// инициализация репо
+	ri := rimport.NewRepositoryImports(config)
+	defer ri.RedisDB.Close()
+
+	// инициализация usecase
+	ui := uimport.NewUsecaseImport(ri)
+
+	bot_api.NewPrfileBotApi(b, ui)
 
 	b.Start(ctx)
 
