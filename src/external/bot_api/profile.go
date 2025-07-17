@@ -4,20 +4,24 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"tg_video_lessons_bot/internal/entity/user"
+	"tg_video_lessons_bot/internal/entity/global"
+	"tg_video_lessons_bot/internal/entity/profile"
+	"tg_video_lessons_bot/tools/bot_tool"
 	"tg_video_lessons_bot/tools/dump"
+	"tg_video_lessons_bot/uimport"
 	"time"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
 
-type UserBotApi struct {
-	b *bot.Bot
+type ProfileBotApi struct {
+	b  *bot.Bot
+	ui *uimport.UsecaseImport
 }
 
-func NewUserBotApi(b *bot.Bot) {
-	api := UserBotApi{b}
+func NewPrfileBotApi(b *bot.Bot, ui *uimport.UsecaseImport) {
+	api := ProfileBotApi{b, ui}
 
 	api.b.RegisterHandler(
 		bot.HandlerTypeMessageText,
@@ -32,7 +36,7 @@ func NewUserBotApi(b *bot.Bot) {
 
 	api.b.RegisterHandlerRegexp(
 		bot.HandlerTypeMessageText,
-		user.UserFullNameRegexp,
+		profile.UserFullNameRegexp,
 		api.FullNameHandler,
 		[]bot.Middleware{
 			// singleFlight,
@@ -42,7 +46,7 @@ func NewUserBotApi(b *bot.Bot) {
 
 	api.b.RegisterHandlerRegexp(
 		bot.HandlerTypeMessageText,
-		user.UserBirthDateRegexp,
+		profile.UserBirthDateRegexp,
 		api.BirthDateHandler,
 		[]bot.Middleware{
 			// singleFlight,
@@ -73,20 +77,20 @@ func NewUserBotApi(b *bot.Bot) {
 	// )
 }
 
-var TempUserMap = make(map[int64]user.UserToRegiser, 10)
-var RegisteredUsers = make(map[int64]user.UserToRegiser, 10)
+var TempUserMap = make(map[int64]profile.UserToRegiser, 10)
+var RegisteredUsers = make(map[int64]profile.UserToRegiser, 10)
 
 type MessageHandlerFunc = func(ctx context.Context, b *bot.Bot, update *models.Update)
 
-var StepsHanders = map[user.RegisterStep]MessageHandlerFunc{
-	user.RegisterStepFullName: func(ctx context.Context, b *bot.Bot, update *models.Update) {
+var StepsHanders = map[profile.RegisterStep]MessageHandlerFunc{
+	profile.RegisterStepFullName: func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   "Введите ваше имя и фамилию",
 		})
 	},
 
-	user.RegisterStepBirthDate: func(ctx context.Context, b *bot.Bot, update *models.Update) {
+	profile.RegisterStepBirthDate: func(ctx context.Context, b *bot.Bot, update *models.Update) {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   "Укажите дату рождения",
@@ -94,34 +98,21 @@ var StepsHanders = map[user.RegisterStep]MessageHandlerFunc{
 	},
 }
 
-func (e UserBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (e *ProfileBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	from := update.Message.From
 
-	cachedUser, exists := TempUserMap[from.ID]
-	if !exists {
-		cachedUser = user.UserToRegiser{
-			User: user.User{
-				ID: from.ID,
-			},
-			RegisterStep: user.RegisterStepFullName,
-		}
-		TempUserMap[from.ID] = cachedUser
+	messages, err := e.ui.Usecase.Profile.HandlerStart(ctx, *from)
+	if err != nil {
+		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
+		return
 	}
 
-	step := cachedUser.RegisterStep
-
-	StepsHanders[step](ctx, b, update)
+	for _, message := range messages {
+		bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
+	}
 }
 
-func (e UserBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	from := update.Message.From
-	cachedUser := TempUserMap[from.ID]
-
-	fmt.Println("cachedUser: ", dump.Struct(cachedUser))
-	// SteptsValidation[cachedUser.RegisterStep](ctx, b, update)
-}
-
-func (e UserBotApi) FullNameHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (e *ProfileBotApi) FullNameHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	from := update.Message.From
 	text := strings.TrimSpace(update.Message.Text)
 
@@ -131,14 +122,22 @@ func (e UserBotApi) FullNameHandler(ctx context.Context, b *bot.Bot, update *mod
 	cachedUser.FirstName = splitted[0]
 	cachedUser.LastName = splitted[1]
 
-	cachedUser.RegisterStep = user.RegisterStepBirthDate
+	cachedUser.RegisterStep = profile.RegisterStepBirthDate
 
 	TempUserMap[from.ID] = cachedUser
 
 	StepsHanders[cachedUser.RegisterStep](ctx, b, update)
 }
 
-func (e UserBotApi) BirthDateHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	from := update.Message.From
+	cachedUser := TempUserMap[from.ID]
+
+	fmt.Println("cachedUser: ", dump.Struct(cachedUser))
+	// SteptsValidation[cachedUser.RegisterStep](ctx, b, update)
+}
+
+func (e *ProfileBotApi) BirthDateHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	from := update.Message.From
 	text := update.Message.Text
 
