@@ -8,3 +8,7 @@ var (
 	// ErrInternalError внутряя ошибка
 	ErrInternalError = errors.New("произошла внутреняя ошибка")
 )
+
+var MessagesByError = map[error]string{
+	ErrInternalError: "Внутреняя ошибка бота, попробуйте позже или свяжитесь с поддержкой.",
+}
