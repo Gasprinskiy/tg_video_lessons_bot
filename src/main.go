@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -15,12 +14,6 @@ import (
 )
 
 func main() {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Panic("Ошибка загрузки .env файла: ", err)
-	// 	return
-	// }
-
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
@@ -42,7 +35,7 @@ func main() {
 
 	bot_api.NewPrfileBotApi(b, ui)
 
-	b.Start(ctx)
+	log.Println("бот запущен")
 
-	fmt.Println("бот запущен")
+	b.Start(ctx)
 }
