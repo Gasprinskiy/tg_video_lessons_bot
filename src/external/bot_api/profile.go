@@ -2,10 +2,10 @@ package bot_api
 
 import (
 	"context"
-	"fmt"
+	"tg_video_lessons_bot/external/bot_api/middleware"
 	"tg_video_lessons_bot/internal/entity/global"
-	"tg_video_lessons_bot/internal/entity/profile"
 	"tg_video_lessons_bot/tools/bot_tool"
+	"tg_video_lessons_bot/tools/str"
 	"tg_video_lessons_bot/uimport"
 
 	"github.com/go-telegram/bot"
@@ -15,43 +15,49 @@ import (
 type ProfileBotApi struct {
 	b  *bot.Bot
 	ui *uimport.UsecaseImport
+	m  *middleware.AuthMiddleware
 }
 
-func NewPrfileBotApi(b *bot.Bot, ui *uimport.UsecaseImport) {
-	api := ProfileBotApi{b, ui}
+func NewPrfileBotApi(
+	b *bot.Bot,
+	ui *uimport.UsecaseImport,
+	m *middleware.AuthMiddleware,
+) {
+	api := ProfileBotApi{b, ui, m}
 
 	api.b.RegisterHandler(
 		bot.HandlerTypeMessageText,
-		"/start",
+		global.CommandStart,
 		bot.MatchTypeExact,
 		api.StartHandler,
 		// middleware
-		allreadyRegistered,
+		api.m.AllreadyRegistered,
 	)
 
 	api.b.RegisterHandlerRegexp(
 		bot.HandlerTypeMessageText,
-		profile.UserFullNameRegexp,
+		str.FullNameRegexp,
 		api.FullNameHandler,
 		// middleware
-		allreadyRegistered,
+		api.m.AllreadyRegistered,
 	)
 
 	api.b.RegisterHandlerRegexp(
 		bot.HandlerTypeMessageText,
-		profile.UserBirthDateRegexp,
+		str.BirthDateRegexp,
 		api.BirthDateHandler,
 		// middleware
-		allreadyRegistered,
+		api.m.AllreadyRegistered,
 	)
 
 	api.b.RegisterHandler(
 		bot.HandlerTypeMessageText,
 		"",
 		bot.MatchTypeExact,
-		api.AnyHandler,
+		api.PhoneNumberHandler,
 		// middleware
-		allreadyRegistered,
+		api.m.AllreadyRegistered,
+		api.m.IsContactShared,
 	)
 
 	api.b.RegisterHandler(
@@ -60,40 +66,15 @@ func NewPrfileBotApi(b *bot.Bot, ui *uimport.UsecaseImport) {
 		bot.MatchTypePrefix,
 		api.AnyHandler,
 		// middleware
-		allreadyRegistered,
+		api.m.AllreadyRegistered,
 	)
 
-	// api.b.RegisterHandler(
-	// 	bot.HandlerTypeCallbackQueryData,
-	// 	"level:",
-	// 	bot.MatchTypePrefix,
-	// 	LevelHandler,
-	// 	[]bot.Middleware{
-	// 		// singleFlight,
-	// 		allreadyCallbackQuery,
-	// 	}...,
-	// )
-}
-
-var TempUserMap = make(map[int64]profile.UserToRegiser, 10)
-var RegisteredUsers = make(map[int64]profile.UserToRegiser, 10)
-
-type MessageHandlerFunc = func(ctx context.Context, b *bot.Bot, update *models.Update)
-
-var StepsHanders = map[profile.RegisterStep]MessageHandlerFunc{
-	profile.RegisterStepFullName: func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Введите ваше имя и фамилию",
-		})
-	},
-
-	profile.RegisterStepBirthDate: func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Укажите дату рождения",
-		})
-	},
+	api.b.RegisterHandler(
+		bot.HandlerTypeMessageText,
+		global.CommandProfile,
+		bot.MatchTypeExact,
+		api.HandlerProfile,
+	)
 }
 
 func (e *ProfileBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -125,7 +106,7 @@ func (e *ProfileBotApi) BirthDateHandler(ctx context.Context, b *bot.Bot, update
 		return
 	}
 
-	bot_tool.SendReplyKeyboardMessage(ctx, b, update, message, false)
+	bot_tool.SendReplyKeyboardMessage(ctx, b, update, message, true)
 }
 
 func (e *ProfileBotApi) PhoneNumberHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -135,20 +116,12 @@ func (e *ProfileBotApi) PhoneNumberHandler(ctx context.Context, b *bot.Bot, upda
 		return
 	}
 
-	bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
+	bot_tool.SendReplyKeyboardMessage(ctx, b, update, message, false)
 }
 
 func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	fmt.Println("update.Message.Text: ", update.Message.Text)
-	// SteptsValidation[cachedUser.RegisterStep](ctx, b, update)
+	err := e.ui.Usecase.Profile.HandleStepsValidationMessages(ctx, update.Message.From.ID)
+	bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
 }
 
-// middleware
-func allreadyRegistered(next bot.HandlerFunc) bot.HandlerFunc {
-	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		if _, exists := RegisteredUsers[update.Message.From.ID]; exists {
-			return
-		}
-		next(ctx, b, update)
-	}
-}
+func (e *ProfileBotApi) HandlerProfile(ctx context.Context, b *bot.Bot, update *models.Update) {}
