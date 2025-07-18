@@ -1,20 +1,11 @@
 package profile
 
-import (
-	"regexp"
-)
-
 type RegisterStep string
 
 const (
 	RegisterStepFullName    RegisterStep = "full_name"
 	RegisterStepBirthDate   RegisterStep = "birth_date"
 	RegisterStepPhoneNumber RegisterStep = "phone_number"
-)
-
-var (
-	UserFullNameRegexp  = regexp.MustCompile(`^(([А-ЯЁA-Z][а-яёa-z]+)\s+([А-ЯЁA-Z][а-яёa-z]+))$`)
-	UserBirthDateRegexp = regexp.MustCompile(`^\d{2}\.\d{2}\.\d{4}$`)
 )
 
 var (
@@ -31,4 +22,10 @@ var StepMessages = map[RegisterStep]string{
 	RegisterStepFullName:    "Введите ваше <b>Имя</b> и <b>Фамилию</b>",
 	RegisterStepBirthDate:   "Введите вашу дату рождения в формате <b>ДД.ММ.ГГГГ</b>",
 	RegisterStepPhoneNumber: "Отправьте ваш номер телефона",
+}
+
+var StepValidationErrorMessages = map[RegisterStep]error{
+	RegisterStepFullName:    ErrFullNameValidation,
+	RegisterStepBirthDate:   ErrBirhDateInvalid,
+	RegisterStepPhoneNumber: ErrPhoneNumberEmpty,
 }

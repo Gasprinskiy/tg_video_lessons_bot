@@ -5,6 +5,8 @@ const (
 	LangCodeUZ = "uz"
 )
 
+const AppLangCode = LangCodeRU
+
 const (
 	CommandStart = "/start"
 )
