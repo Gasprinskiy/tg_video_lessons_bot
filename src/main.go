@@ -8,10 +8,13 @@ import (
 	"tg_video_lessons_bot/config"
 	"tg_video_lessons_bot/external/bot_api"
 	"tg_video_lessons_bot/external/bot_api/middleware"
+	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/uimport"
 
 	"github.com/go-telegram/bot"
+	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -19,6 +22,30 @@ func main() {
 	defer cancel()
 
 	config := config.NewConfig()
+
+	// подключение к redis
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddr,
+		Password: config.RedisPass,
+	})
+	defer rdb.Close()
+	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
+		log.Panic("ошибка при пинге redis: ", err)
+	}
+
+	// подключение к postgres
+	pgdb, err := sqlx.Connect("postgres", config.PostgresURL)
+	if err != nil {
+		log.Fatalln("не удалось подключиться к базе postgres: ", err)
+	}
+	defer pgdb.Close()
+
+	if err := pgdb.Ping(); err != nil {
+		log.Fatal("ошибка при пинге postgres : ", err)
+	}
+
+	// инициализация session manager
+	sessionManager := transaction.NewSQLSessionManager(pgdb)
 
 	// инициализация бота
 	b, err := bot.New(config.BotToken)
@@ -28,11 +55,10 @@ func main() {
 	defer b.Close(ctx)
 
 	// инициализация репо
-	ri := rimport.NewRepositoryImports(config)
-	defer ri.RedisDB.Close()
+	ri := rimport.NewRepositoryImports(config, rdb)
 
 	// инициализация usecase
-	ui := uimport.NewUsecaseImport(ri)
+	ui := uimport.NewUsecaseImport(ri, sessionManager)
 
 	// инициализация middleware
 	mid := middleware.NewAuthMiddleware(ri.Repository.UserCache)
