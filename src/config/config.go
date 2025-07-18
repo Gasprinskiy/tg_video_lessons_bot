@@ -10,11 +10,11 @@ import (
 
 // Config структура для хранения переменных окружения
 type Config struct {
-	// DbUrl        string
-	BotToken  string
-	RedisAddr string
-	RedisPass string
-	RedisTtl  time.Duration
+	PostgresURL string
+	BotToken    string
+	RedisAddr   string
+	RedisPass   string
+	RedisTtl    time.Duration
 }
 
 // NewConfig загружает переменные из .env и возвращает структуру Config
@@ -25,10 +25,10 @@ func NewConfig() *Config {
 	}
 
 	return &Config{
-		// DbUrl:        os.Getenv("DATABASE_URL"),
-		BotToken:  os.Getenv("BOT_TOKEN"),
-		RedisPass: os.Getenv("REDIS_PASSWORD"),
-		RedisAddr: fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
-		RedisTtl:  time.Minute * time.Duration(redisTtl),
+		PostgresURL: os.Getenv("POSTGRES_URL"),
+		BotToken:    os.Getenv("BOT_TOKEN"),
+		RedisPass:   os.Getenv("REDIS_PASSWORD"),
+		RedisAddr:   fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
+		RedisTtl:    time.Minute * time.Duration(redisTtl),
 	}
 }
