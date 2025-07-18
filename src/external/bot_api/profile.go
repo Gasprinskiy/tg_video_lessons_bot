@@ -71,7 +71,7 @@ func NewPrfileBotApi(
 
 	api.b.RegisterHandler(
 		bot.HandlerTypeMessageText,
-		global.CommandProfile,
+		global.TextCommandProfile[global.AppLangCode],
 		bot.MatchTypeExact,
 		api.HandlerProfile,
 	)

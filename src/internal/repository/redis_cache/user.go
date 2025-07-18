@@ -36,7 +36,7 @@ func (r *userCache) HasRegisteredUser(ctx context.Context, ID int64) (bool, erro
 }
 
 func (r *userCache) SetUserToRegister(ctx context.Context, userToRegister profile.UserToRegiser) error {
-	byteData, err := json.Marshal(userToRegister.User)
+	byteData, err := json.Marshal(userToRegister)
 	if err != nil {
 		return err
 	}

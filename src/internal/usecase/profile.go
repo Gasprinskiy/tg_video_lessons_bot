@@ -10,6 +10,7 @@ import (
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/tools/chronos"
 	"tg_video_lessons_bot/tools/dump"
+	"tg_video_lessons_bot/tools/str"
 	"time"
 
 	"github.com/go-telegram/bot/models"
@@ -66,13 +67,13 @@ func (u *Profile) HandlerFullName(ctx context.Context, ID int64, text string) (m
 		return message, global.ErrInternalError
 	}
 
-	splitted := strings.Split(text, " ")
-	if len(splitted) != 2 {
+	splitted := str.SplitStringByEmptySpace(text)
+	if len(splitted) < 2 {
 		return message, profile.ErrFullNameValidation
 	}
 
-	cachedUser.FirstName = strings.TrimSpace(splitted[0])
-	cachedUser.LastName = strings.TrimSpace(splitted[1])
+	cachedUser.FirstName = str.CapFirstLowerRest(splitted[0])
+	cachedUser.LastName = str.CapFirstLowerRest(splitted[1])
 
 	cachedUser.RegisterStep = profile.RegisterStepBirthDate
 
@@ -124,7 +125,7 @@ func (u *Profile) HandleBirthDate(ctx context.Context, ID int64, text string) (m
 	return message, nil
 }
 
-func (u *Profile) HandlePhoneNumber(ctx context.Context, ID int64, contact models.Contact) (message string, err error) {
+func (u *Profile) HandlePhoneNumber(ctx context.Context, ID int64, contact models.Contact) (message global.ReplyMessage, err error) {
 	if contact.PhoneNumber == "" {
 		return message, profile.ErrPhoneNumberEmpty
 	}
@@ -151,5 +152,24 @@ func (u *Profile) HandlePhoneNumber(ctx context.Context, ID int64, contact model
 		return message, global.ErrInternalError
 	}
 
-	return profile.RegistrationWasSuccessful, nil
+	message = global.NewReplyMessage(
+		profile.RegistrationWasSuccessful,
+		[]models.KeyboardButton{
+			{
+				Text: global.TextCommandProfile[global.AppLangCode],
+			},
+		},
+	)
+
+	return message, nil
+}
+
+func (u *Profile) HandleStepsValidationMessages(ctx context.Context, ID int64) error {
+	cachedUser, err := u.ri.Repository.UserCache.GetUserToRegister(ctx, ID)
+	if err != nil {
+		log.Println("не удалось найти пользователя: ", err)
+		return global.ErrInternalError
+	}
+
+	return profile.StepValidationErrorMessages[cachedUser.RegisterStep]
 }

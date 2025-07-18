@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"tg_video_lessons_bot/config"
 	"tg_video_lessons_bot/external/bot_api"
+	"tg_video_lessons_bot/external/bot_api/middleware"
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/uimport"
 
@@ -33,7 +34,10 @@ func main() {
 	// инициализация usecase
 	ui := uimport.NewUsecaseImport(ri)
 
-	bot_api.NewPrfileBotApi(b, ui)
+	// инициализация middleware
+	mid := middleware.NewAuthMiddleware(ri.Repository.UserCache)
+
+	bot_api.NewPrfileBotApi(b, ui, mid)
 
 	log.Println("бот запущен")
 
