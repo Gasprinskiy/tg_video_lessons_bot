@@ -13,6 +13,6 @@ const (
 
 var (
 	TextCommandProfile = map[string]string{
-		LangCodeRU: "CommandProfile",
+		LangCodeRU: "Профиль",
 	}
 )
