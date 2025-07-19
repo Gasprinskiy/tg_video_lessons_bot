@@ -1,5 +1,7 @@
 package chronos
 
+import "time"
+
 const (
 	// DateTimeMask маска с датой и временем
 	DateTimeMask = "02.01.2006 15:04:05"
@@ -12,3 +14,12 @@ const (
 	// DateMaskLocale маска с датой и зоной
 	DateMaskLocale = "02.01.2006 -0700"
 )
+
+func NowTruncUTC() time.Time {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+}
+
+func DurationBetween(start, end time.Time) time.Duration {
+	return end.Sub(start)
+}
