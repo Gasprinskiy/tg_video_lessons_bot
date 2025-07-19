@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"fmt"
 	"math"
 	"tg_video_lessons_bot/tools/chronos"
 	"time"
@@ -20,7 +21,7 @@ type UserToRegiser struct {
 	RegisterStep `json:"register_step"`
 }
 
-func (u User) CalcAge() float64 {
+func (u User) CalcAge() string {
 	durationBetween := chronos.DurationBetween(u.BirthDate, chronos.NowTruncUTC())
-	return math.Round(durationBetween.Hours() / 24 / 365.25)
+	return fmt.Sprintf("%g", math.Round(durationBetween.Hours()/24/365.25))
 }
