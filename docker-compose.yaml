@@ -7,9 +7,9 @@ services:
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_DB: $POSTGRES_DB
     volumes:
-      - postgres/data:/data
-    expose:
-      - $POSTGRES_PORT
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - $POSTGRES_OUTER_PORT:$POSTGRES_INNER_PORT
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -31,12 +31,12 @@ services:
   server:
     build: ./src
     container_name: bot_api
-    # depends_on:
-    #  redis:
-    #   condition: service_healthy
-    #   restart: true
+    depends_on:
+     postgres:
+      condition: service_healthy
+      restart: true
     environment:
-      POSTGRES_URL: host=postgres user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB port=$POSTGRES_PORT sslmode=disable
+      POSTGRES_URL: host=postgres user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB port=$POSTGRES_INNER_PORT sslmode=disable
       REDIS_PORT: $REDIS_PORT
       BOT_TOKEN: $BOT_TOKEN
       REDIS_PASSWORD: $REDIS_PASSWORD
