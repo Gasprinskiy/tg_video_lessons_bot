@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 )
 
