@@ -31,7 +31,7 @@ func NewPrfileBotApi(
 		bot.MatchTypeExact,
 		api.StartHandler,
 		// middleware
-		api.m.AllreadyRegistered,
+		api.m.NotRegistered,
 	)
 
 	api.b.RegisterHandlerRegexp(
@@ -39,7 +39,7 @@ func NewPrfileBotApi(
 		str.FullNameRegexp,
 		api.FullNameHandler,
 		// middleware
-		api.m.AllreadyRegistered,
+		api.m.NotRegistered,
 	)
 
 	api.b.RegisterHandlerRegexp(
@@ -47,7 +47,7 @@ func NewPrfileBotApi(
 		str.BirthDateRegexp,
 		api.BirthDateHandler,
 		// middleware
-		api.m.AllreadyRegistered,
+		api.m.NotRegistered,
 	)
 
 	api.b.RegisterHandler(
@@ -55,6 +55,8 @@ func NewPrfileBotApi(
 		global.TextCommandProfile[global.AppLangCode],
 		bot.MatchTypeExact,
 		api.HandlerProfile,
+		// middleware
+		api.m.IsRegsitered,
 	)
 
 	api.b.RegisterHandler(
@@ -63,7 +65,7 @@ func NewPrfileBotApi(
 		bot.MatchTypeExact,
 		api.PhoneNumberHandler,
 		// middleware
-		api.m.AllreadyRegistered,
+		api.m.NotRegistered,
 		api.m.IsContactShared,
 	)
 
@@ -73,7 +75,7 @@ func NewPrfileBotApi(
 		bot.MatchTypePrefix,
 		api.AnyHandler,
 		// middleware
-		api.m.AllreadyRegistered,
+		api.m.NotRegistered,
 	)
 }
 
