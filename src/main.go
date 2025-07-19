@@ -62,7 +62,12 @@ func main() {
 	ui := uimport.NewUsecaseImport(ri, sessionManager)
 
 	// инициализация middleware
-	mid := middleware.NewAuthMiddleware(ri.Repository.UserCache)
+	mid := middleware.NewAuthMiddleware(
+		ctx,
+		ri.Repository.UserCache,
+		ri.Repository.Profile,
+		sessionManager,
+	)
 
 	bot_api.NewPrfileBotApi(b, ui, mid)
 
