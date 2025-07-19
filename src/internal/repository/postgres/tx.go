@@ -1,4 +1,4 @@
-package postgresql
+package postgres
 
 import (
 	"tg_video_lessons_bot/internal/transaction"

@@ -7,9 +7,10 @@ import (
 	"strings"
 	"tg_video_lessons_bot/internal/entity/global"
 	"tg_video_lessons_bot/internal/entity/profile"
+	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/tools/chronos"
-	"tg_video_lessons_bot/tools/dump"
+	"tg_video_lessons_bot/tools/sm_gen"
 	"tg_video_lessons_bot/tools/str"
 	"time"
 
@@ -18,10 +19,14 @@ import (
 
 type Profile struct {
 	ri *rimport.RepositoryImports
+	sm transaction.SessionManager
 }
 
-func NewProfile(ri *rimport.RepositoryImports) *Profile {
-	return &Profile{ri}
+func NewProfile(
+	ri *rimport.RepositoryImports,
+	sm transaction.SessionManager,
+) *Profile {
+	return &Profile{ri, sm}
 }
 
 func (u *Profile) HandlerStart(ctx context.Context, ID int64, userName string) ([]string, error) {
@@ -144,11 +149,17 @@ func (u *Profile) HandlePhoneNumber(ctx context.Context, ID int64, contact model
 		return message, global.ErrInternalError
 	}
 
-	fmt.Println("cachedUser: ", dump.Struct(cachedUser.User))
-
 	err = u.ri.Repository.UserCache.SetRegisteredUserID(ctx, ID)
 	if err != nil {
 		log.Println("не удалось сохранить ID пользователя в кеш: ", err)
+		return message, global.ErrInternalError
+	}
+
+	err = sm_gen.InTransactionSession(u.sm, func(ts transaction.Session) error {
+		return u.ri.Profile.CreateNewUser(ts, cachedUser.User)
+	})
+	if err != nil {
+		log.Println("не удалось сохранить данные пользователя: ", err)
 		return message, global.ErrInternalError
 	}
 
@@ -172,4 +183,23 @@ func (u *Profile) HandleStepsValidationMessages(ctx context.Context, ID int64) e
 	}
 
 	return profile.StepValidationErrorMessages[cachedUser.RegisterStep]
+}
+
+func (u *Profile) HandlerProfileInfo(ID int64) (message string, err error) {
+	userData, err := sm_gen.LoadDataIgnoreErrNoData(u.sm, func(ts transaction.Session) (profile.User, error) {
+		return u.ri.Repository.Profile.FindUserByTGID(ts, ID)
+	}, "не удалось найти пользователя по ID телеграм")
+	if err != nil {
+		return message, err
+	}
+
+	message = fmt.Sprintf(
+		profile.ProfileInfoMessage,
+		userData.FirstName,
+		userData.LastName,
+		userData.PhoneNumber,
+		userData.CalcAge(),
+	)
+
+	return message, nil
 }

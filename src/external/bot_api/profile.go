@@ -52,6 +52,13 @@ func NewPrfileBotApi(
 
 	api.b.RegisterHandler(
 		bot.HandlerTypeMessageText,
+		global.TextCommandProfile[global.AppLangCode],
+		bot.MatchTypeExact,
+		api.HandlerProfile,
+	)
+
+	api.b.RegisterHandler(
+		bot.HandlerTypeMessageText,
 		"",
 		bot.MatchTypeExact,
 		api.PhoneNumberHandler,
@@ -67,13 +74,6 @@ func NewPrfileBotApi(
 		api.AnyHandler,
 		// middleware
 		api.m.AllreadyRegistered,
-	)
-
-	api.b.RegisterHandler(
-		bot.HandlerTypeMessageText,
-		global.TextCommandProfile[global.AppLangCode],
-		bot.MatchTypeExact,
-		api.HandlerProfile,
 	)
 }
 
@@ -124,4 +124,12 @@ func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *mode
 	bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
 }
 
-func (e *ProfileBotApi) HandlerProfile(ctx context.Context, b *bot.Bot, update *models.Update) {}
+func (e *ProfileBotApi) HandlerProfile(ctx context.Context, b *bot.Bot, update *models.Update) {
+	message, err := e.ui.Usecase.Profile.HandlerProfileInfo(update.Message.From.ID)
+	if err != nil {
+		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
+		return
+	}
+
+	bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
+}
