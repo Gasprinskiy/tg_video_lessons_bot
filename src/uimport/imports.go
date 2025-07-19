@@ -7,7 +7,6 @@ import (
 )
 
 type UsecaseImport struct {
-	SessionManager transaction.SessionManager
 	Usecase
 }
 
@@ -16,9 +15,8 @@ func NewUsecaseImport(
 	sessionManager transaction.SessionManager,
 ) *UsecaseImport {
 	return &UsecaseImport{
-		SessionManager: sessionManager,
 		Usecase: Usecase{
-			Profile: usecase.NewProfile(ri),
+			Profile: usecase.NewProfile(ri, sessionManager),
 		},
 	}
 }
