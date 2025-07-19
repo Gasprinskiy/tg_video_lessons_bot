@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 var (
@@ -17,8 +18,9 @@ func SplitStringByEmptySpace(str string) []string {
 }
 
 func CapFirstLowerRest(str string) string {
-	first := fmt.Sprintf("%c", str[0])
-	rest := str[1:]
+	runes := []rune(str)
+	first := unicode.ToUpper(runes[0])
+	rest := strings.ToLower(string(runes[1:]))
 
-	return fmt.Sprintf("%s%s", strings.ToUpper(first), strings.ToLower(rest))
+	return fmt.Sprintf("%c%s", first, rest)
 }
