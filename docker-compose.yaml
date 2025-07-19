@@ -1,6 +1,8 @@
 services:
+
   postgres:
     image: postgres:16-alpine
+    container_name: postgres-container
     restart: always
     environment:
       POSTGRES_USER: $POSTGRES_USER
@@ -8,6 +10,7 @@ services:
       POSTGRES_DB: $POSTGRES_DB
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
     ports:
       - $POSTGRES_OUTER_PORT:$POSTGRES_INNER_PORT
     healthcheck:
