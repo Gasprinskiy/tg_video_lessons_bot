@@ -28,11 +28,16 @@ func (r *userCache) SetRegisteredUserID(ctx context.Context, ID int64) error {
 
 func (r *userCache) HasRegisteredUser(ctx context.Context, ID int64) (bool, error) {
 	result, err := r.db.Get(ctx, fmt.Sprintf("%d:registered", ID)).Result()
-	if err != nil {
-		return false, genredis.HandleGetError(err)
-	}
+	switch err {
+	case nil:
+		return strconv.ParseBool(result)
 
-	return strconv.ParseBool(result)
+	case redis.Nil:
+		return false, nil
+
+	default:
+		return false, err
+	}
 }
 
 func (r *userCache) SetUserToRegister(ctx context.Context, userToRegister profile.UserToRegiser) error {
