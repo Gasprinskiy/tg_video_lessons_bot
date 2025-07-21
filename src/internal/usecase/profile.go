@@ -185,12 +185,29 @@ func (u *Profile) HandleStepsValidationMessages(ctx context.Context, ID int64) e
 	return profile.StepValidationErrorMessages[cachedUser.RegisterStep]
 }
 
-func (u *Profile) HandlerProfileInfo(ID int64) (message string, err error) {
-	userData, err := sm_gen.LoadDataIgnoreErrNoData(u.sm, func(ts transaction.Session) (profile.User, error) {
-		return u.ri.Repository.Profile.FindUserByTGID(ts, ID)
-	}, "не удалось найти пользователя по ID телеграм")
-	if err != nil {
-		return message, err
+func (u *Profile) HandlerProfileInfo(ctx context.Context, ID int64) (message string, err error) {
+	var userData profile.User
+
+	userData, err = u.ri.Repository.UserCache.GetTempUserData(ctx, ID)
+	switch err {
+	case nil:
+	case global.ErrNoData:
+		userData, err = sm_gen.LoadDataIgnoreErrNoData(u.sm, func(ts transaction.Session) (profile.User, error) {
+			return u.ri.Repository.Profile.FindUserByTGID(ts, ID)
+		}, "не удалось найти пользователя по ID телеграм")
+		if err != nil {
+			return message, err
+		}
+
+		err = u.ri.UserCache.SetTempUserData(ctx, userData)
+		if err != nil {
+			log.Println("не удалось найти пользователя: ", err)
+			return message, global.ErrInternalError
+		}
+
+	default:
+		log.Println("не удалось найти пользователя: ", err)
+		return message, global.ErrInternalError
 	}
 
 	message = fmt.Sprintf(

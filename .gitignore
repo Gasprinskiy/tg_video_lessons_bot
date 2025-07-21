@@ -1,5 +1,5 @@
 .env
 ./src/.env
-./redis_data
-./postgres_data
+redis_data
+postgres_data
 src.code-workspace

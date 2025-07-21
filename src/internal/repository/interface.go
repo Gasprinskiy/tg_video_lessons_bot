@@ -12,6 +12,9 @@ type UserCache interface {
 	SetUserToRegister(ctx context.Context, userToRegister profile.UserToRegiser) error
 	GetUserToRegister(ctx context.Context, ID int64) (profile.UserToRegiser, error)
 	DeleteUserToRegister(ctx context.Context, ID int64) error
+	SetTempUserData(ctx context.Context, user profile.User) error
+	GetTempUserData(ctx context.Context, ID int64) (profile.User, error)
+	DeleteTempUserData(ctx context.Context, ID int64) error
 }
 
 type Profile interface {

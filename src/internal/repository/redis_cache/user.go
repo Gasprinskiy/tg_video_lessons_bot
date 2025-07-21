@@ -57,3 +57,21 @@ func (r *userCache) DeleteUserToRegister(ctx context.Context, ID int64) error {
 	_, err := r.db.Del(ctx, fmt.Sprintf("%d", ID)).Result()
 	return err
 }
+
+func (r *userCache) SetTempUserData(ctx context.Context, user profile.User) error {
+	byteData, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+
+	return r.db.Set(ctx, fmt.Sprintf("%d:temp", user.ID), byteData, r.ttl).Err()
+}
+
+func (r *userCache) GetTempUserData(ctx context.Context, ID int64) (profile.User, error) {
+	return genredis.GetStruct[profile.User](ctx, r.db, fmt.Sprintf("%d:temp", ID))
+}
+
+func (r *userCache) DeleteTempUserData(ctx context.Context, ID int64) error {
+	_, err := r.db.Del(ctx, fmt.Sprintf("%d:temp", ID)).Result()
+	return err
+}

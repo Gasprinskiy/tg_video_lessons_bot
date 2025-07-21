@@ -127,7 +127,7 @@ func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *mode
 }
 
 func (e *ProfileBotApi) HandlerProfile(ctx context.Context, b *bot.Bot, update *models.Update) {
-	message, err := e.ui.Usecase.Profile.HandlerProfileInfo(update.Message.From.ID)
+	message, err := e.ui.Usecase.Profile.HandlerProfileInfo(ctx, update.Message.From.ID)
 	if err != nil {
 		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
 		return
