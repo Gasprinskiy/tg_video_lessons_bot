@@ -4,6 +4,8 @@ import (
 	"context"
 	"tg_video_lessons_bot/external/bot_api/middleware"
 	"tg_video_lessons_bot/internal/entity/global"
+	"tg_video_lessons_bot/internal/transaction"
+	"tg_video_lessons_bot/tools/bot_api_gen"
 	"tg_video_lessons_bot/tools/bot_tool"
 	"tg_video_lessons_bot/tools/str"
 	"tg_video_lessons_bot/uimport"
@@ -16,14 +18,16 @@ type ProfileBotApi struct {
 	b  *bot.Bot
 	ui *uimport.UsecaseImport
 	m  *middleware.AuthMiddleware
+	sm transaction.SessionManager
 }
 
 func NewPrfileBotApi(
 	b *bot.Bot,
 	ui *uimport.UsecaseImport,
 	m *middleware.AuthMiddleware,
+	sm transaction.SessionManager,
 ) {
-	api := ProfileBotApi{b, ui, m}
+	api := ProfileBotApi{b, ui, m, sm}
 
 	api.b.RegisterHandler(
 		bot.HandlerTypeMessageText,
@@ -80,45 +84,53 @@ func NewPrfileBotApi(
 }
 
 func (e *ProfileBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	messages, err := e.ui.Usecase.Profile.HandlerStart(ctx, update.Message.From.ID, update.Message.From.Username)
-	if err != nil {
-		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
-		return
-	}
-
-	for _, message := range messages {
-		bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
-	}
+	bot_api_gen.HanldeSendMultiplyMessageWitContextSession(
+		ctx,
+		b,
+		update,
+		e.sm,
+		func(ctx context.Context) ([]string, error) {
+			return e.ui.Usecase.Profile.HandlerStart(ctx, update.Message.From.ID, update.Message.From.Username)
+		},
+	)
 }
 
 func (e *ProfileBotApi) FullNameHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	message, err := e.ui.Usecase.Profile.HandlerFullName(ctx, update.Message.From.ID, update.Message.Text)
-	if err != nil {
-		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
-		return
-	}
-
-	bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
+	bot_api_gen.HanldeSendMessageWitContextSession(
+		ctx,
+		b,
+		update,
+		e.sm,
+		func(ctx context.Context) (string, error) {
+			return e.ui.Usecase.Profile.HandlerFullName(ctx, update.Message.From.ID, update.Message.Text)
+		},
+	)
 }
 
 func (e *ProfileBotApi) BirthDateHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	message, err := e.ui.Usecase.Profile.HandleBirthDate(ctx, update.Message.From.ID, update.Message.Text)
-	if err != nil {
-		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
-		return
-	}
-
-	bot_tool.SendReplyKeyboardMessage(ctx, b, update, message, true)
+	bot_api_gen.HanldeSendReplyMessageWitContextSession(
+		ctx,
+		b,
+		update,
+		e.sm,
+		true,
+		func(ctx context.Context) (global.ReplyMessage, error) {
+			return e.ui.Usecase.Profile.HandleBirthDate(ctx, update.Message.From.ID, update.Message.Text)
+		},
+	)
 }
 
 func (e *ProfileBotApi) PhoneNumberHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	message, err := e.ui.Usecase.Profile.HandlePhoneNumber(ctx, update.Message.From.ID, *update.Message.Contact)
-	if err != nil {
-		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
-		return
-	}
-
-	bot_tool.SendReplyKeyboardMessage(ctx, b, update, message, false)
+	bot_api_gen.HanldeSendReplyMessageWitContextSession(
+		ctx,
+		b,
+		update,
+		e.sm,
+		false,
+		func(ctx context.Context) (global.ReplyMessage, error) {
+			return e.ui.Usecase.Profile.HandlePhoneNumber(ctx, update.Message.From.ID, *update.Message.Contact)
+		},
+	)
 }
 
 func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -127,11 +139,13 @@ func (e *ProfileBotApi) AnyHandler(ctx context.Context, b *bot.Bot, update *mode
 }
 
 func (e *ProfileBotApi) HandlerProfile(ctx context.Context, b *bot.Bot, update *models.Update) {
-	message, err := e.ui.Usecase.Profile.HandlerProfileInfo(ctx, update.Message.From.ID)
-	if err != nil {
-		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
-		return
-	}
-
-	bot_tool.SendHTMLParseModeMessage(ctx, b, update, message)
+	bot_api_gen.HanldeSendMessageWitContextSession(
+		ctx,
+		b,
+		update,
+		e.sm,
+		func(ctx context.Context) (string, error) {
+			return e.ui.Usecase.Profile.HandlerProfileInfo(ctx, update.Message.From.ID)
+		},
+	)
 }
