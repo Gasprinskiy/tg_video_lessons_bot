@@ -59,7 +59,7 @@ func main() {
 	ri := rimport.NewRepositoryImports(config, rdb)
 
 	// инициализация usecase
-	ui := uimport.NewUsecaseImport(ri, sessionManager)
+	ui := uimport.NewUsecaseImport(ri)
 
 	// инициализация middleware
 	mid := middleware.NewAuthMiddleware(
@@ -69,7 +69,7 @@ func main() {
 		sessionManager,
 	)
 
-	bot_api.NewPrfileBotApi(b, ui, mid)
+	bot_api.NewPrfileBotApi(b, ui, mid, sessionManager)
 
 	log.Println("бот запущен")
 

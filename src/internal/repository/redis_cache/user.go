@@ -40,21 +40,21 @@ func (r *userCache) HasRegisteredUser(ctx context.Context, ID int64) (bool, erro
 	}
 }
 
-func (r *userCache) SetUserToRegister(ctx context.Context, userToRegister profile.UserToRegiser) error {
+func (r *userCache) SetUserToRegister(ctx context.Context, userToRegister profile.UserToRegister) error {
 	byteData, err := json.Marshal(userToRegister)
 	if err != nil {
 		return err
 	}
 
-	return r.db.Set(ctx, fmt.Sprintf("%d", userToRegister.ID), byteData, r.ttl).Err()
+	return r.db.Set(ctx, fmt.Sprintf("%d:to_reg", userToRegister.ID), byteData, r.ttl).Err()
 }
 
-func (r *userCache) GetUserToRegister(ctx context.Context, ID int64) (profile.UserToRegiser, error) {
-	return genredis.GetStruct[profile.UserToRegiser](ctx, r.db, fmt.Sprintf("%d", ID))
+func (r *userCache) GetUserToRegister(ctx context.Context, ID int64) (profile.UserToRegister, error) {
+	return genredis.GetStruct[profile.UserToRegister](ctx, r.db, fmt.Sprintf("%d:to_reg", ID))
 }
 
 func (r *userCache) DeleteUserToRegister(ctx context.Context, ID int64) error {
-	_, err := r.db.Del(ctx, fmt.Sprintf("%d", ID)).Result()
+	_, err := r.db.Del(ctx, fmt.Sprintf("%d:to_reg", ID)).Result()
 	return err
 }
 

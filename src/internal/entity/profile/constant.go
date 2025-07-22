@@ -1,5 +1,7 @@
 package profile
 
+import "fmt"
+
 type RegisterStep string
 
 const (
@@ -7,6 +9,18 @@ const (
 	RegisterStepBirthDate   RegisterStep = "birth_date"
 	RegisterStepPhoneNumber RegisterStep = "phone_number"
 )
+
+func (s *RegisterStep) Scan(value any) error {
+	if b, ok := value.([]byte); ok {
+		*s = RegisterStep(string(b))
+		return nil
+	}
+	if sVal, ok := value.(string); ok {
+		*s = RegisterStep(sVal)
+		return nil
+	}
+	return fmt.Errorf("не удалось записать %v в тип RegisterStep", value)
+}
 
 var (
 	// HelloMessage = map[string]string{

@@ -7,7 +7,6 @@ import (
 	"tg_video_lessons_bot/internal/repository"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/tools/bot_tool"
-	"tg_video_lessons_bot/tools/sm_gen"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -25,10 +24,15 @@ func NewAuthMiddleware(
 	sm transaction.SessionManager,
 ) *AuthMiddleware {
 
-	userIDList, err := sm_gen.LoadDataIgnoreErrNoData(sm, func(ts transaction.Session) ([]int64, error) {
-		return userRepo.LoadAllActiveUserIDS(ts)
-	}, "не удалось загрузить активных пользователей")
-	if err != nil {
+	ts := sm.CreateSession()
+	if err := ts.Start(); err != nil {
+		log.Panic("не удалось запустить транзакцию: ", err)
+	}
+
+	defer ts.Rollback()
+
+	userIDList, err := userRepo.LoadAllActiveUserIDS(ts)
+	if err != nil && err != global.ErrNoData {
 		log.Panic("ошибка при поиске активных пользовтелей")
 	}
 
