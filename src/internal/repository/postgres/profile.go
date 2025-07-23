@@ -80,7 +80,8 @@ func (r *profileRepo) FindUserByTGID(ts transaction.Session, ID int64) (profile.
 			up.last_name,
 			up.tg_user_name,
 			up.birth_date,
-			up.phone_number
+			up.phone_number,
+			up.register_date
 		FROM bot_users_profile up
 		WHERE up.tg_id = $1
 	`

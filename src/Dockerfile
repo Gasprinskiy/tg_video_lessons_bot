@@ -1,5 +1,13 @@
 FROM golang:1.24-alpine AS builder
 
+# Устанавливаем tzdata
+RUN apk add --no-cache tzdata
+
+# Устанавливаем локальную зону
+ENV TZ=Asia/Tashkent
+RUN cp /usr/share/zoneinfo/Asia/Tashkent /etc/localtime \
+    && echo "Asia/Tashkent" > /etc/timezone
+
 WORKDIR /app
 COPY . .
 

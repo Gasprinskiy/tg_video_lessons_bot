@@ -39,6 +39,7 @@ services:
       condition: service_healthy
       restart: true
     environment:
+      TZ: Asia/Tashkent
       POSTGRES_URL: host=postgres user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB port=$POSTGRES_INNER_PORT sslmode=disable
       REDIS_PORT: $REDIS_PORT
       BOT_TOKEN: $BOT_TOKEN

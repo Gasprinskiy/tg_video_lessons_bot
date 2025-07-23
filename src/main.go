@@ -14,11 +14,18 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/jmoiron/sqlx"
+
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 )
 
 func main() {
+	// loc, err := time.LoadLocation("Asia/Tashkent")
+	// if err != nil {
+	// 	log.Fatalf("cannot load time location: %v", err)
+	// }
+	// time.Local = loc
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 

@@ -211,6 +211,7 @@ func (u *Profile) HandlerProfileInfo(ctx context.Context, ID int64) (message str
 		userData.LastName,
 		userData.PhoneNumber,
 		userData.CalcAge(),
+		userData.RegisterDate.Format(chronos.DateMask),
 	)
 
 	return message, nil
