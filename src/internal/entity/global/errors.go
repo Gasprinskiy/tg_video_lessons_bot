@@ -21,4 +21,5 @@ var MessagesByError = map[error]string{
 	profile.ErrBirthDateInFuture:  "Дата рождения не может быть в будущем",
 	profile.ErrBirhDateInvalid:    "Дата рождения введено не верно, попробуйте еще раз",
 	profile.ErrPhoneNumberEmpty:   "Номер телефона не отправлен или отправлен не верно, попробуйте еще раз",
+	profile.ErrPhoneNumberInvalid: "Номер телефона введен не верно, попробуйте еще раз",
 }

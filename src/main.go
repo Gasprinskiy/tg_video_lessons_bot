@@ -10,7 +10,9 @@ import (
 	"tg_video_lessons_bot/external/bot_api/middleware"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/rimport"
+	"tg_video_lessons_bot/tools/logger"
 	"tg_video_lessons_bot/uimport"
+	"time"
 
 	"github.com/go-telegram/bot"
 	"github.com/jmoiron/sqlx"
@@ -20,11 +22,11 @@ import (
 )
 
 func main() {
-	// loc, err := time.LoadLocation("Asia/Tashkent")
-	// if err != nil {
-	// 	log.Fatalf("cannot load time location: %v", err)
-	// }
-	// time.Local = loc
+	loc, err := time.LoadLocation("Asia/Tashkent")
+	if err != nil {
+		log.Fatalf("cannot load time location: %v", err)
+	}
+	time.Local = loc
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
@@ -52,6 +54,13 @@ func main() {
 		log.Fatal("ошибка при пинге postgres : ", err)
 	}
 
+	// инициализация логгера
+	hook := logger.NewPostgresHook(pgdb)
+	logger, err := logger.InitLogger(hook)
+	if err != nil {
+		log.Fatalln("Не удалось инициализировать логгер:", err)
+	}
+
 	// инициализация session manager
 	sessionManager := transaction.NewSQLSessionManager(pgdb)
 
@@ -66,7 +75,7 @@ func main() {
 	ri := rimport.NewRepositoryImports(config, rdb)
 
 	// инициализация usecase
-	ui := uimport.NewUsecaseImport(ri)
+	ui := uimport.NewUsecaseImport(ri, logger)
 
 	// инициализация middleware
 	mid := middleware.NewAuthMiddleware(
@@ -76,7 +85,7 @@ func main() {
 		sessionManager,
 	)
 
-	bot_api.NewPrfileBotApi(b, ui, mid, sessionManager)
+	bot_api.NewPrfileBotApi(b, ui, mid, sessionManager, logger)
 
 	log.Println("бот запущен")
 
