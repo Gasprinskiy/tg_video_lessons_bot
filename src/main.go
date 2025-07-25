@@ -12,7 +12,6 @@ import (
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/tools/logger"
 	"tg_video_lessons_bot/uimport"
-	"time"
 
 	"github.com/go-telegram/bot"
 	"github.com/jmoiron/sqlx"
@@ -22,11 +21,11 @@ import (
 )
 
 func main() {
-	loc, err := time.LoadLocation("Asia/Tashkent")
-	if err != nil {
-		log.Fatalf("cannot load time location: %v", err)
-	}
-	time.Local = loc
+	// loc, err := time.LoadLocation("Asia/Tashkent")
+	// if err != nil {
+	// 	log.Fatalf("cannot load time location: %v", err)
+	// }
+	// time.Local = loc
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()

@@ -1,29 +1,9 @@
 services:
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: postgres-container
-    restart: always
-    environment:
-      TZ: Asia/Tashkent
-      POSTGRES_USER: $POSTGRES_USER
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-      POSTGRES_DB: $POSTGRES_DB
-    volumes:
-      - ./postgres_data:/var/lib/postgresql/data
-      - ./initdb:/docker-entrypoint-initdb.d
-    ports:
-      - $POSTGRES_OUTER_PORT:$POSTGRES_INNER_PORT
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
-
   redis:
     image: redis:7.4-alpine
     container_name: redis-container
+    networks:
+      - inner_network
     command: sh -c "exec redis-server --requirepass \"$REDIS_PASSWORD\" --save '' --appendonly no"
     volumes:
       - ./redis_data:/data
@@ -35,10 +15,9 @@ services:
   server:
     build: ./src
     container_name: bot_api
-    depends_on:
-     postgres:
-      condition: service_healthy
-      restart: true
+    networks:
+      - postgres_network
+      - inner_network
     environment:
       TZ: Asia/Tashkent
       POSTGRES_URL: host=postgres user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB port=$POSTGRES_INNER_PORT sslmode=disable
@@ -46,3 +25,8 @@ services:
       BOT_TOKEN: $BOT_TOKEN
       REDIS_PASSWORD: $REDIS_PASSWORD
       REDIS_TTL: $REDIS_TTL
+
+networks:
+  postgres_network:
+    external: true
+  inner_network:
