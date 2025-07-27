@@ -1,22 +1,9 @@
 services:
-  redis:
-    image: redis:7.4-alpine
-    container_name: redis-container
-    networks:
-      - inner_network
-    command: sh -c "exec redis-server --requirepass \"$REDIS_PASSWORD\" --save '' --appendonly no"
-    volumes:
-      - ./redis_data:/data
-    ports:
-      - "$REDIS_PORT:$REDIS_PORT"
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-
   server:
     build: ./src
     container_name: bot_api
     networks:
-      - postgres_network
+      - bot_services
       - inner_network
     environment:
       TZ: Asia/Tashkent
@@ -27,6 +14,6 @@ services:
       REDIS_TTL: $REDIS_TTL
 
 networks:
-  postgres_network:
+  bot_services:
     external: true
   inner_network:
