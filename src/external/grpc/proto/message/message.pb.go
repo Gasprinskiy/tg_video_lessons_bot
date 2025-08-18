@@ -23,7 +23,7 @@ const (
 
 type SendInviteLinkRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TgIs          int64                  `protobuf:"varint,1,opt,name=tg_is,json=tgIs,proto3" json:"tg_is,omitempty"` // ID пользователя (из базы бота/Telegram user_id)
+	TgId          int64                  `protobuf:"varint,1,opt,name=tg_id,json=tgId,proto3" json:"tg_id,omitempty"` // ID пользователя (из базы бота/Telegram user_id)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -58,9 +58,9 @@ func (*SendInviteLinkRequest) Descriptor() ([]byte, []int) {
 	return file_message_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *SendInviteLinkRequest) GetTgIs() int64 {
+func (x *SendInviteLinkRequest) GetTgId() int64 {
 	if x != nil {
-		return x.TgIs
+		return x.TgId
 	}
 	return 0
 }
@@ -115,7 +115,7 @@ const file_message_proto_rawDesc = "" +
 	"\n" +
 	"\rmessage.proto\x12\rmessage_proto\",\n" +
 	"\x15SendInviteLinkRequest\x12\x13\n" +
-	"\x05tg_is\x18\x01 \x01(\x03R\x04tgIs\")\n" +
+	"\x05tg_id\x18\x01 \x01(\x03R\x04tgId\")\n" +
 	"\x13SendInviteLinkReply\x12\x12\n" +
 	"\x04sent\x18\x01 \x01(\bR\x04sent2h\n" +
 	"\n" +

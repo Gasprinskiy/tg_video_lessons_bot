@@ -8,7 +8,7 @@ service BotService {
 }
 
 message SendInviteLinkRequest {
-  int64 tg_is = 1;     // ID пользователя (из базы бота/Telegram user_id)
+  int64 tg_id = 1;     // ID пользователя (из базы бота/Telegram user_id)
 }
 
 message SendInviteLinkReply {

@@ -35,7 +35,7 @@ func NewMessageGrpcHandler(
 
 func (h MessageGrpcHandler) SendInviteLink(ctx context.Context, request *messageproto.SendInviteLinkRequest) (*messageproto.SendInviteLinkReply, error) {
 	_, err := h.b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: request.TgIs,
+		ChatID: request.TgId,
 		Text:   "FUCK YOU PAL",
 	})
 
