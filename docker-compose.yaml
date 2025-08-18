@@ -1,5 +1,5 @@
 services:
-  server:
+  bot_api_server:
     build: ./src
     container_name: bot_api
     networks:
@@ -12,7 +12,9 @@ services:
       BOT_TOKEN: $BOT_TOKEN
       REDIS_PASSWORD: $REDIS_PASSWORD
       REDIS_TTL: $REDIS_TTL
-
+      GRPC_PORT: $GRPC_PORT
+    ports:
+    - "50051:50051"
 networks:
   bot_services:
     external: true

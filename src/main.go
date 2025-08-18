@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 	"os"
 	"os/signal"
+	"sync"
 	"tg_video_lessons_bot/config"
 	"tg_video_lessons_bot/external/bot_api"
 	"tg_video_lessons_bot/external/bot_api/middleware"
+	grpc_extrenal "tg_video_lessons_bot/external/grpc"
+	messageproto "tg_video_lessons_bot/external/grpc/proto/message"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/tools/logger"
@@ -15,17 +19,14 @@ import (
 
 	"github.com/go-telegram/bot"
 	"github.com/jmoiron/sqlx"
+	"google.golang.org/grpc"
 
 	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 )
 
 func main() {
-	// loc, err := time.LoadLocation("Asia/Tashkent")
-	// if err != nil {
-	// 	log.Fatalf("cannot load time location: %v", err)
-	// }
-	// time.Local = loc
+	var wg sync.WaitGroup
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
@@ -86,7 +87,38 @@ func main() {
 
 	bot_api.NewPrfileBotApi(b, ui, mid, sessionManager, logger)
 
-	log.Println("бот запущен")
+	wg.Add(2)
+	// запуск gin
+	go func() {
+		defer wg.Done()
 
-	b.Start(ctx)
+		lis, err := net.Listen("tcp", config.GrpcPort)
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+
+		grpcServer := grpc.NewServer()
+
+		handler := grpc_extrenal.NewMessageGrpcHandler(b, ui, sessionManager, logger)
+		messageproto.RegisterBotServiceServer(grpcServer, handler)
+
+		log.Printf("gRPC server started on: %s", config.GrpcPort)
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
+	// запуск api бота
+	go func() {
+		defer wg.Done()
+
+		b.Start(ctx)
+
+		log.Println("bot started")
+	}()
+
+	// Ожидание сигнала завершения
+	<-ctx.Done()
+
+	wg.Wait()
 }

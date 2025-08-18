@@ -15,6 +15,7 @@ type Config struct {
 	RedisAddr   string
 	RedisPass   string
 	RedisTtl    time.Duration
+	GrpcPort    string
 }
 
 // NewConfig загружает переменные из .env и возвращает структуру Config
@@ -30,5 +31,6 @@ func NewConfig() *Config {
 		RedisPass:   os.Getenv("REDIS_PASSWORD"),
 		RedisAddr:   fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
 		RedisTtl:    time.Minute * time.Duration(redisTtl),
+		GrpcPort:    fmt.Sprintf(":%s", os.Getenv("GRPC_PORT")),
 	}
 }
