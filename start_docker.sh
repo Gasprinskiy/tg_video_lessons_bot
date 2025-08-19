@@ -14,4 +14,5 @@ echo "Run bot_api docker"
 # Запуск
 docker compose down
 docker compose build
-docker compose -p bot_api up --force-recreate --remove-orphans $DETACH_FLAG
+docker compose up --force-recreate $DETACH_FLAG
+

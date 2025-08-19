@@ -40,3 +40,19 @@ func SendReplyKeyboardMessage(
 		},
 	})
 }
+
+func SendInlineKeyboardMarkupMessage(
+	ctx context.Context,
+	b *bot.Bot,
+	update *models.Update,
+	replyMessage global.InlineKeyboardMessage,
+	closeAfterClick bool,
+) {
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: update.Message.Chat.ID,
+		Text:   replyMessage.Message,
+		ReplyMarkup: &models.InlineKeyboardMarkup{
+			InlineKeyboard: [][]models.InlineKeyboardButton{replyMessage.ButtonList},
+		},
+	})
+}

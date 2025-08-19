@@ -4,10 +4,11 @@
 // - protoc             v3.12.4
 // source: message.proto
 
-package messageproto
+package notify_message
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

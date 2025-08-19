@@ -13,3 +13,15 @@ func NewReplyMessage(message string, buttonList []models.KeyboardButton) ReplyMe
 		ButtonList: buttonList,
 	}
 }
+
+type InlineKeyboardMessage struct {
+	Message    string
+	ButtonList []models.InlineKeyboardButton
+}
+
+func NewInlineKeyboardMessage(message string, buttonList []models.InlineKeyboardButton) InlineKeyboardMessage {
+	return InlineKeyboardMessage{
+		Message:    message,
+		ButtonList: buttonList,
+	}
+}

@@ -11,7 +11,7 @@ import (
 	"tg_video_lessons_bot/external/bot_api"
 	"tg_video_lessons_bot/external/bot_api/middleware"
 	grpc_extrenal "tg_video_lessons_bot/external/grpc"
-	messageproto "tg_video_lessons_bot/external/grpc/proto/message"
+	"tg_video_lessons_bot/external/grpc/proto/notify_message"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/tools/logger"
@@ -75,7 +75,7 @@ func main() {
 	ri := rimport.NewRepositoryImports(config, rdb)
 
 	// инициализация usecase
-	ui := uimport.NewUsecaseImport(ri, logger)
+	ui := uimport.NewUsecaseImport(b, ri, logger, config)
 
 	// инициализация middleware
 	mid := middleware.NewAuthMiddleware(
@@ -100,7 +100,7 @@ func main() {
 		grpcServer := grpc.NewServer()
 
 		handler := grpc_extrenal.NewMessageGrpcHandler(b, ui, sessionManager, logger)
-		messageproto.RegisterBotServiceServer(grpcServer, handler)
+		notify_message.RegisterBotServiceServer(grpcServer, handler)
 
 		log.Printf("gRPC server started on: %s", config.GrpcPort)
 		if err := grpcServer.Serve(lis); err != nil {
@@ -112,9 +112,9 @@ func main() {
 	go func() {
 		defer wg.Done()
 
-		b.Start(ctx)
-
 		log.Println("bot started")
+
+		b.Start(ctx)
 	}()
 
 	// Ожидание сигнала завершения

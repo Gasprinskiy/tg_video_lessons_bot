@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package message_proto;
-option go_package = "./messageproto";
+option go_package = "./notify_message";
 
 service BotService {
   rpc SendInviteLink(SendInviteLinkRequest) returns (SendInviteLinkReply);
@@ -13,4 +13,5 @@ message SendInviteLinkRequest {
 
 message SendInviteLinkReply {
   bool sent = 1;          // true, если сообщение успешно отправлено пользователю
+  string error = 2;
 }
