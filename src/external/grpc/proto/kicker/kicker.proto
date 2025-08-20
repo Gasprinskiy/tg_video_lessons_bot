@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package kicker_proto;
+option go_package = "./kicker";
+
+service KickerService {
+  rpc KickExpiredSubsUsers(KickExpiredSubsUsersRequest) returns (KickExpiredSubsUsersReply);
+}
+
+message KickExpiredSubsUsersRequest {
+  repeated int64 tg_ids = 1;
+}
+
+message KickExpiredSubsUsersReply {
+  bool done = 1;
+}

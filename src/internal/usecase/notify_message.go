@@ -45,6 +45,16 @@ func (u *NotifyMessage) CreateChanelInviteLinkMessage(ctx context.Context, TGID 
 		return message, global.ErrInternalError
 	}
 
+	if user.HasPurchases {
+		u.b.UnbanChatMember(
+			ctx,
+			&bot.UnbanChatMemberParams{
+				ChatID: u.conf.BotChanelID,
+				UserID: user.ID,
+			},
+		)
+	}
+
 	invite, err := u.b.CreateChatInviteLink(
 		ctx,
 		&bot.CreateChatInviteLinkParams{
@@ -61,9 +71,8 @@ func (u *NotifyMessage) CreateChanelInviteLinkMessage(ctx context.Context, TGID 
 		fmt.Sprintf(notify_message.InviteMessage, user.FirstName),
 		[]models.InlineKeyboardButton{
 			{
-				Text:         "Вступить",
-				CallbackData: notify_message.NavigateToInviteLinkCallbackDataPrefix,
-				URL:          invite.InviteLink,
+				Text: "Вступить",
+				URL:  invite.InviteLink,
 			},
 		},
 	)

@@ -17,6 +17,7 @@ type User struct {
 	PhoneNumber  string    `json:"phone_number" db:"phone_number"`
 	JoinDate     time.Time `json:"join_date" db:"join_date"`
 	RegisterDate time.Time `json:"register_date" db:"register_date"`
+	HasPurchases bool      `json:"-" db:"has_purchases"`
 }
 
 func (u User) CalcAge() string {

@@ -23,6 +23,7 @@ func NewUsecaseImport(
 		Usecase: Usecase{
 			Profile:       usecase.NewProfile(ri, log),
 			NotifyMessage: usecase.NewNotifyMessage(b, ri, log, conf),
+			Kicker:        usecase.NewKickerUsecase(b, ri, log, conf),
 		},
 	}
 }

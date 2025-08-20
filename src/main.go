@@ -11,6 +11,7 @@ import (
 	"tg_video_lessons_bot/external/bot_api"
 	"tg_video_lessons_bot/external/bot_api/middleware"
 	grpc_extrenal "tg_video_lessons_bot/external/grpc"
+	"tg_video_lessons_bot/external/grpc/proto/kicker"
 	"tg_video_lessons_bot/external/grpc/proto/notify_message"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/rimport"
@@ -99,8 +100,11 @@ func main() {
 
 		grpcServer := grpc.NewServer()
 
-		handler := grpc_extrenal.NewMessageGrpcHandler(b, ui, sessionManager, logger)
-		notify_message.RegisterBotServiceServer(grpcServer, handler)
+		notifyMessageHandler := grpc_extrenal.NewMessageGrpcHandler(b, ui, sessionManager, logger)
+		kickerHadner := grpc_extrenal.NewKickerGrpcHandler(b, ui, sessionManager, logger)
+
+		notify_message.RegisterBotServiceServer(grpcServer, notifyMessageHandler)
+		kicker.RegisterKickerServiceServer(grpcServer, kickerHadner)
 
 		log.Printf("gRPC server started on: %s", config.GrpcPort)
 		if err := grpcServer.Serve(lis); err != nil {
