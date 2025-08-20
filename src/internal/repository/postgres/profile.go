@@ -77,7 +77,7 @@ func (r *profileRepo) FindUserByTGID(ts transaction.Session, ID int64) (profile.
 		WITH purchase AS (
 			SELECT bp.p_id, bp.u_id
 			FROM bot_users_purchases bp
-			ORDER BY bp.p_time DESC
+			ORDER BY bp.p_id DESC
 			LIMIT 1
 		)
 		SELECT

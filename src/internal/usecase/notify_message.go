@@ -45,14 +45,18 @@ func (u *NotifyMessage) CreateChanelInviteLinkMessage(ctx context.Context, TGID 
 		return message, global.ErrInternalError
 	}
 
-	if user.HasPurchases {
-		u.b.UnbanChatMember(
-			ctx,
-			&bot.UnbanChatMemberParams{
-				ChatID: u.conf.BotChanelID,
-				UserID: user.ID,
-			},
-		)
+	_, err = u.b.UnbanChatMember(
+		ctx,
+		&bot.UnbanChatMemberParams{
+			ChatID:       u.conf.BotChanelID,
+			UserID:       TGID,
+			OnlyIfBanned: true,
+		},
+	)
+
+	if err != nil {
+		u.log.Db.WithFields(lf).Errorln("не удалось разбанить пользователя по: ", err)
+		return message, global.ErrInternalError
 	}
 
 	invite, err := u.b.CreateChatInviteLink(
