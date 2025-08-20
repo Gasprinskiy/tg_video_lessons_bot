@@ -86,7 +86,7 @@ func main() {
 		sessionManager,
 	)
 
-	bot_api.NewPrfileBotApi(b, ui, mid, sessionManager, logger)
+	bot_api.NewProfileBotApi(b, ui, mid, sessionManager, logger)
 
 	wg.Add(2)
 	// запуск gin

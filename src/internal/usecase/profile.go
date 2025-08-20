@@ -188,7 +188,7 @@ func (u *Profile) HandlePhoneNumber(ctx context.Context, ID int64, contact model
 		profile.RegistrationWasSuccessful,
 		[]models.KeyboardButton{
 			{
-				Text: global.TextCommandProfile[global.AppLangCode],
+				Text: global.TextCommandProfile,
 			},
 		},
 	)

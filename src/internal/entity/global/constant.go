@@ -5,14 +5,12 @@ const (
 	LangCodeUZ = "uz"
 )
 
-const AppLangCode = LangCodeRU
+const AppLangCode = LangCodeUZ
 
 const (
 	CommandStart = "/start"
 )
 
 var (
-	TextCommandProfile = map[string]string{
-		LangCodeRU: "Профиль",
-	}
+	TextCommandProfile = "Shaxsiy ma’lumot"
 )

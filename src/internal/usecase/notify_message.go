@@ -75,7 +75,7 @@ func (u *NotifyMessage) CreateChanelInviteLinkMessage(ctx context.Context, TGID 
 		fmt.Sprintf(notify_message.InviteMessage, user.FirstName),
 		[]models.InlineKeyboardButton{
 			{
-				Text: "Вступить",
+				Text: notify_message.InviteButtonText,
 				URL:  invite.InviteLink,
 			},
 		},

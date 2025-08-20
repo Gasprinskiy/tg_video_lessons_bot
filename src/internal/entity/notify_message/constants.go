@@ -1,7 +1,8 @@
 package notify_message
 
 const (
-	InviteMessage = `%s Вам открыт доступ в приватный канал, для вступления нажмите кнопку "Вступить"`
+	InviteMessage    = `%s Sizga shaxsiy kanalga obuna bo'ldingiz, qo‘shilish uchun "Qo‘shilish" tugmasini bosing`
+	InviteButtonText = "Qo‘shilish"
 )
 
 const (

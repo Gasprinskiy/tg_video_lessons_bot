@@ -22,7 +22,7 @@ type ProfileBotApi struct {
 	log *logger.Logger
 }
 
-func NewPrfileBotApi(
+func NewProfileBotApi(
 	b *bot.Bot,
 	ui *uimport.UsecaseImport,
 	m *middleware.AuthMiddleware,
@@ -64,7 +64,7 @@ func NewPrfileBotApi(
 
 	api.b.RegisterHandler(
 		bot.HandlerTypeMessageText,
-		global.TextCommandProfile[global.AppLangCode],
+		global.TextCommandProfile,
 		bot.MatchTypeExact,
 		api.HandlerProfile,
 		// middleware
