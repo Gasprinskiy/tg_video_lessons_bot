@@ -9,20 +9,39 @@ import (
 )
 
 type User struct {
-	ID           int64     `json:"id" db:"tg_id"`
-	FirstName    string    `json:"first_name" db:"first_name"`
-	LastName     string    `json:"last_name" db:"last_name"`
-	UserName     string    `json:"user_name" db:"tg_user_name"`
-	BirthDate    time.Time `json:"birth_date" db:"birth_date"`
-	PhoneNumber  string    `json:"phone_number" db:"phone_number"`
-	JoinDate     time.Time `json:"join_date" db:"join_date"`
-	RegisterDate time.Time `json:"register_date" db:"register_date"`
-	HasPurchases bool      `json:"-" db:"has_purchases"`
+	ID            int64              `json:"id" db:"tg_id"`
+	FirstName     string             `json:"first_name" db:"first_name"`
+	LastName      string             `json:"last_name" db:"last_name"`
+	UserName      string             `json:"user_name" db:"tg_user_name"`
+	BirthDate     time.Time          `json:"birth_date" db:"birth_date"`
+	PhoneNumber   string             `json:"phone_number" db:"phone_number"`
+	JoinDate      time.Time          `json:"join_date" db:"join_date"`
+	RegisterDate  time.Time          `json:"register_date" db:"register_date"`
+	HasPurchases  bool               `json:"-" db:"has_purchases"`
+	PurchasesTime sql_null.NullTime  `json:"-" db:"p_time"`
+	PurchasesTerm sql_null.NullInt64 `json:"-" db:"term_in_month"`
 }
 
 func (u User) CalcAge() string {
 	durationBetween := chronos.DurationBetween(u.BirthDate, chronos.NowTruncUTC())
 	return fmt.Sprintf("%g", math.Round(durationBetween.Hours()/24/365.25))
+}
+
+func (u User) PurchasesStatus() string {
+	if u.PurchasesTime.Valid {
+		now := chronos.NowTruncUTC()
+
+		subDate := chronos.BeginingOfDate(u.PurchasesTime.Time)
+		expireDate := subDate.AddDate(0, u.PurchasesTerm.GetInt(), 0)
+
+		if now.After(expireDate) {
+			return "Muddati tugadi"
+		}
+
+		return fmt.Sprintf("%s %s", expireDate.Format(chronos.DateMask), "gacha faol")
+	}
+
+	return "Yo‘q"
 }
 
 type UserToRegister struct {

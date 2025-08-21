@@ -75,8 +75,13 @@ func (r *profileRepo) FindUserToRegiserByTGID(ts transaction.Session, ID int64) 
 func (r *profileRepo) FindUserByTGID(ts transaction.Session, ID int64) (profile.User, error) {
 	sqlQuery := `
 		WITH purchase AS (
-			SELECT bp.p_id, bp.u_id
+			SELECT
+				bp.p_id,
+				bp.u_id,
+				bp.p_time,
+				st.term_in_month
 			FROM bot_users_purchases bp
+				JOIN bot_subscription_types st ON (st.sub_id = bp.sub_id)
 			ORDER BY bp.p_id DESC
 			LIMIT 1
 		)
@@ -88,7 +93,9 @@ func (r *profileRepo) FindUserByTGID(ts transaction.Session, ID int64) (profile.
 			up.birth_date,
 			up.phone_number,
 			up.register_date,
-			p.p_id IS NOT NULL as has_purchases
+			p.p_id IS NOT NULL as has_purchases,
+			p.p_time,
+			p.term_in_month
 		FROM bot_users_profile up
 			LEFT JOIN purchase p ON (p.u_id = up.u_id)
 		WHERE up.tg_id = $1

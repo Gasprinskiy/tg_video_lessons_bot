@@ -218,12 +218,13 @@ func (u *Profile) HandlerProfileInfo(ctx context.Context, ID int64) (message str
 
 		userData, err = u.ri.Repository.Profile.FindUserByTGID(ts, ID)
 		if err != nil {
-			return message, err
+			u.log.Db.WithFields(lf).Errorln(u.logPrefix(), "не удалось найти данные пользователя в базе:", err)
+			return message, global.ErrInternalError
 		}
 
 		err = u.ri.UserCache.SetTempUserData(ctx, userData)
 		if err != nil {
-			u.log.Db.WithFields(lf).Errorln(u.logPrefix(), "не удалось найти данные пользователя в базе:", err)
+			u.log.Db.WithFields(lf).Errorln(u.logPrefix(), "не удалось закешировать данные пользователя в базе:", err)
 			return message, global.ErrInternalError
 		}
 
@@ -237,8 +238,7 @@ func (u *Profile) HandlerProfileInfo(ctx context.Context, ID int64) (message str
 		userData.FirstName,
 		userData.LastName,
 		userData.PhoneNumber,
-		userData.CalcAge(),
-		userData.RegisterDate.Format(chronos.DateMask),
+		userData.PurchasesStatus(),
 	)
 
 	return message, nil
