@@ -16,10 +16,10 @@ func NewReplyMessage(message string, buttonList [][]models.KeyboardButton) Reply
 
 type InlineKeyboardMessage struct {
 	Message    string
-	ButtonList []models.InlineKeyboardButton
+	ButtonList [][]models.InlineKeyboardButton
 }
 
-func NewInlineKeyboardMessage(message string, buttonList []models.InlineKeyboardButton) InlineKeyboardMessage {
+func NewInlineKeyboardMessage(message string, buttonList [][]models.InlineKeyboardButton) InlineKeyboardMessage {
 	return InlineKeyboardMessage{
 		Message:    message,
 		ButtonList: buttonList,

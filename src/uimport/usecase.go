@@ -7,4 +7,5 @@ type Usecase struct {
 	NotifyMessage *usecase.NotifyMessage
 	Kicker        *usecase.KickerUsecase
 	Contact       *usecase.Contact
+	Payment       *usecase.Payment
 }

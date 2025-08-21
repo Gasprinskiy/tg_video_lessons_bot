@@ -49,7 +49,7 @@ func SendInlineKeyboardMarkupMessage(
 		ChatID: update.Message.Chat.ID,
 		Text:   replyMessage.Message,
 		ReplyMarkup: &models.InlineKeyboardMarkup{
-			InlineKeyboard: [][]models.InlineKeyboardButton{replyMessage.ButtonList},
+			InlineKeyboard: replyMessage.ButtonList,
 		},
 	})
 }

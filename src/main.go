@@ -86,6 +86,7 @@ func main() {
 		sessionManager,
 	)
 
+	bot_api.NewPayemntBotApi(b, ui, mid, sessionManager, logger)
 	bot_api.NewContactBotApi(b, ui, mid)
 	bot_api.NewProfileBotApi(b, ui, mid, sessionManager, logger, ri.UserCache)
 

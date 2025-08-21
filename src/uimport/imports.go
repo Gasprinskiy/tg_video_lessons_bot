@@ -25,6 +25,7 @@ func NewUsecaseImport(
 			NotifyMessage: usecase.NewNotifyMessage(b, ri, log, conf),
 			Kicker:        usecase.NewKickerUsecase(b, ri, log, conf),
 			Contact:       usecase.NewContact(conf),
+			Payment:       usecase.NewPayment(b, ri, log, conf),
 		},
 	}
 }

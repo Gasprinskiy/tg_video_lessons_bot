@@ -59,7 +59,7 @@ func (h NotifyMessageGrpcHandler) SendInviteLink(ctx context.Context, request *n
 		ChatID: request.TgId,
 		Text:   replyMessage.Message,
 		ReplyMarkup: &models.InlineKeyboardMarkup{
-			InlineKeyboard: [][]models.InlineKeyboardButton{replyMessage.ButtonList},
+			InlineKeyboard: replyMessage.ButtonList,
 		},
 	})
 

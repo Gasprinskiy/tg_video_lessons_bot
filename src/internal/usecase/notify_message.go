@@ -73,10 +73,12 @@ func (u *NotifyMessage) CreateChanelInviteLinkMessage(ctx context.Context, TGID 
 
 	message = global.NewInlineKeyboardMessage(
 		fmt.Sprintf(notify_message.InviteMessage, user.FirstName),
-		[]models.InlineKeyboardButton{
+		[][]models.InlineKeyboardButton{
 			{
-				Text: notify_message.InviteButtonText,
-				URL:  invite.InviteLink,
+				{
+					Text: notify_message.InviteButtonText,
+					URL:  invite.InviteLink,
+				},
 			},
 		},
 	)

@@ -19,10 +19,12 @@ func NewContact(conf *config.Config) *Contact {
 func (u *Contact) CreateContactsMessage() global.InlineKeyboardMessage {
 	return global.NewInlineKeyboardMessage(
 		contact.ContactMessage,
-		[]models.InlineKeyboardButton{
+		[][]models.InlineKeyboardButton{
 			{
-				Text: contact.ContactButton,
-				URL:  contact.CreateUserLinkByUsername(u.conf.BotAdminUsername),
+				{
+					Text: contact.ContactButton,
+					URL:  contact.CreateUserLinkByUsername(u.conf.BotAdminUsername),
+				},
 			},
 		},
 	)

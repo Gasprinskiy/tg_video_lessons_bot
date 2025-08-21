@@ -5,6 +5,7 @@ import (
 	"tg_video_lessons_bot/external/bot_api/middleware"
 	"tg_video_lessons_bot/internal/entity/global"
 	"tg_video_lessons_bot/internal/transaction"
+	"tg_video_lessons_bot/tools/bot_tool"
 	"tg_video_lessons_bot/tools/logger"
 	"tg_video_lessons_bot/uimport"
 
@@ -45,6 +46,7 @@ func NewPayemntBotApi(
 	)
 }
 
-func (e *PayemntBotApi) HandlePaymentMethods(ctx context.Context, b *bot.Bot, update *models.Update) {
-
+func (h *PayemntBotApi) HandlePaymentMethods(ctx context.Context, b *bot.Bot, update *models.Update) {
+	message := h.ui.Payment.CreatePaymentTypesMessage()
+	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
 }
