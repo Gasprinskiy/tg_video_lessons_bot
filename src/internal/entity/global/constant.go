@@ -12,7 +12,8 @@ const (
 const AppLangCode = LangCodeUZ
 
 const (
-	CommandStart = "/start"
+	CommandStart        = "/start"
+	CommandStartMessage = "Assalomu alaykum!"
 )
 
 var (

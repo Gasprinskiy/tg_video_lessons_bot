@@ -100,7 +100,7 @@ func (e *ProfileBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *mo
 	if registered && err == nil {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Assalomu alaykum!",
+			Text:   global.CommandStartMessage,
 			ReplyMarkup: &models.ReplyKeyboardMarkup{
 				Keyboard: global.MainMenuButtons,
 			},
