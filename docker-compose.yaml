@@ -14,8 +14,9 @@ services:
       REDIS_TTL: $REDIS_TTL
       GRPC_PORT: $GRPC_PORT
       BOT_CHANEL_ID: $BOT_CHANEL_ID
-    ports:
-      - 60002:60002
+      BOT_ADMIN_USERNAME: $BOT_ADMIN_USERNAME
+    # ports:
+    #   - 60002:60002
 
 networks:
   bot_services:

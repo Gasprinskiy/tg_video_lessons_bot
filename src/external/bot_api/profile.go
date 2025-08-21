@@ -4,6 +4,7 @@ import (
 	"context"
 	"tg_video_lessons_bot/external/bot_api/middleware"
 	"tg_video_lessons_bot/internal/entity/global"
+	"tg_video_lessons_bot/internal/repository"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/tools/bot_api_gen"
 	"tg_video_lessons_bot/tools/logger"
@@ -15,11 +16,12 @@ import (
 )
 
 type ProfileBotApi struct {
-	b   *bot.Bot
-	ui  *uimport.UsecaseImport
-	m   *middleware.AuthMiddleware
-	sm  transaction.SessionManager
-	log *logger.Logger
+	b         *bot.Bot
+	ui        *uimport.UsecaseImport
+	m         *middleware.AuthMiddleware
+	sm        transaction.SessionManager
+	log       *logger.Logger
+	userCache repository.UserCache
 }
 
 func NewProfileBotApi(
@@ -28,6 +30,7 @@ func NewProfileBotApi(
 	m *middleware.AuthMiddleware,
 	sm transaction.SessionManager,
 	log *logger.Logger,
+	userCache repository.UserCache,
 ) {
 	api := ProfileBotApi{
 		b,
@@ -35,6 +38,7 @@ func NewProfileBotApi(
 		m,
 		sm,
 		log,
+		userCache,
 	}
 
 	api.b.RegisterHandler(
@@ -43,7 +47,7 @@ func NewProfileBotApi(
 		bot.MatchTypeExact,
 		api.StartHandler,
 		// middleware
-		api.m.NotRegistered,
+		// api.m.NotRegistered,
 	)
 
 	api.b.RegisterHandlerRegexp(
@@ -92,6 +96,18 @@ func NewProfileBotApi(
 }
 
 func (e *ProfileBotApi) StartHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	registered, err := e.userCache.HasRegisteredUser(ctx, update.Message.From.ID)
+	if registered && err == nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Assalomu alaykum!",
+			ReplyMarkup: &models.ReplyKeyboardMarkup{
+				Keyboard: global.MainMenuButtons,
+			},
+		})
+		return
+	}
+
 	bot_api_gen.HanldeSendMultiplyMessageWitContextSession(
 		ctx,
 		b,

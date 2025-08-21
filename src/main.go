@@ -81,12 +81,13 @@ func main() {
 	// инициализация middleware
 	mid := middleware.NewAuthMiddleware(
 		ctx,
-		ri.Repository.UserCache,
-		ri.Repository.Profile,
+		ri.UserCache,
+		ri.Profile,
 		sessionManager,
 	)
 
-	bot_api.NewProfileBotApi(b, ui, mid, sessionManager, logger)
+	bot_api.NewContactBotApi(b, ui, mid)
+	bot_api.NewProfileBotApi(b, ui, mid, sessionManager, logger, ri.UserCache)
 
 	wg.Add(2)
 	// запуск gin

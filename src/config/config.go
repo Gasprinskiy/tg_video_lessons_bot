@@ -10,13 +10,14 @@ import (
 
 // Config структура для хранения переменных окружения
 type Config struct {
-	PostgresURL string
-	BotToken    string
-	BotChanelID int
-	RedisAddr   string
-	RedisPass   string
-	RedisTtl    time.Duration
-	GrpcPort    string
+	PostgresURL      string
+	BotToken         string
+	BotChanelID      int
+	BotAdminUsername string
+	RedisAddr        string
+	RedisPass        string
+	RedisTtl         time.Duration
+	GrpcPort         string
 }
 
 // NewConfig загружает переменные из .env и возвращает структуру Config
@@ -32,12 +33,13 @@ func NewConfig() *Config {
 	}
 
 	return &Config{
-		PostgresURL: os.Getenv("POSTGRES_URL"),
-		BotToken:    os.Getenv("BOT_TOKEN"),
-		BotChanelID: botChanelID,
-		RedisPass:   os.Getenv("REDIS_PASSWORD"),
-		RedisAddr:   fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
-		RedisTtl:    time.Minute * time.Duration(redisTtl),
-		GrpcPort:    fmt.Sprintf(":%s", os.Getenv("GRPC_PORT")),
+		PostgresURL:      os.Getenv("POSTGRES_URL"),
+		BotToken:         os.Getenv("BOT_TOKEN"),
+		BotChanelID:      botChanelID,
+		BotAdminUsername: os.Getenv("BOT_ADMIN_USERNAME"),
+		RedisPass:        os.Getenv("REDIS_PASSWORD"),
+		RedisAddr:        fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
+		RedisTtl:         time.Minute * time.Duration(redisTtl),
+		GrpcPort:         fmt.Sprintf(":%s", os.Getenv("GRPC_PORT")),
 	}
 }

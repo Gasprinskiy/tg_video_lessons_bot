@@ -124,10 +124,12 @@ func (u *Profile) HandleBirthDate(ctx context.Context, ID int64, text string) (m
 
 	message = global.NewReplyMessage(
 		profile.StepMessages[cachedUser.Step],
-		[]models.KeyboardButton{
+		[][]models.KeyboardButton{
 			{
-				Text:           profile.SendPhoneNumber,
-				RequestContact: true,
+				{
+					Text:           profile.SendPhoneNumber,
+					RequestContact: true,
+				},
 			},
 		},
 	)
@@ -186,11 +188,7 @@ func (u *Profile) HandlePhoneNumber(ctx context.Context, ID int64, contact model
 
 	message = global.NewReplyMessage(
 		profile.RegistrationWasSuccessful,
-		[]models.KeyboardButton{
-			{
-				Text: global.TextCommandProfile,
-			},
-		},
+		global.MainMenuButtons,
 	)
 
 	return message, nil

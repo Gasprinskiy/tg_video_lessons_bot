@@ -32,9 +32,7 @@ func SendReplyKeyboardMessage(
 		ChatID: update.Message.Chat.ID,
 		Text:   replyMessage.Message,
 		ReplyMarkup: &models.ReplyKeyboardMarkup{
-			Keyboard: [][]models.KeyboardButton{
-				replyMessage.ButtonList,
-			},
+			Keyboard:        replyMessage.ButtonList,
 			ResizeKeyboard:  true,
 			OneTimeKeyboard: closeAfterClick,
 		},
@@ -46,7 +44,6 @@ func SendInlineKeyboardMarkupMessage(
 	b *bot.Bot,
 	update *models.Update,
 	replyMessage global.InlineKeyboardMessage,
-	closeAfterClick bool,
 ) {
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,

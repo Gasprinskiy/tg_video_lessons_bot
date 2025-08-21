@@ -6,4 +6,5 @@ type Usecase struct {
 	Profile       *usecase.Profile
 	NotifyMessage *usecase.NotifyMessage
 	Kicker        *usecase.KickerUsecase
+	Contact       *usecase.Contact
 }
