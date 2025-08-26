@@ -3,6 +3,7 @@ package grpc_extrenal
 import (
 	"context"
 	"tg_video_lessons_bot/external/grpc/proto/kicker"
+	"tg_video_lessons_bot/internal/entity/global"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/tools/logger"
 	"tg_video_lessons_bot/uimport"
@@ -35,9 +36,24 @@ func NewKickerGrpcHandler(
 func (h *KickerGrpcHandler) KickExpiredSubsUsers(ctx context.Context, param *kicker.KickExpiredSubsUsersRequest) (*kicker.KickExpiredSubsUsersReply, error) {
 	var result kicker.KickExpiredSubsUsersReply
 
+	ts := h.sm.CreateSession()
+	ctx = transaction.SetSession(ctx, ts)
+
+	if err := ts.Start(); err != nil {
+		h.log.Db.Errorln("не удалось запустить транзакцию: ", err)
+		return &result, global.ErrInternalError
+	}
+
+	defer ts.Rollback()
+
 	err := h.ui.Kicker.KickUsersByTGIDList(ctx, param.TgIds)
 	if err != nil {
 		return &result, err
+	}
+
+	if err = ts.Commit(); err != nil {
+		h.log.Db.Errorln("не удалось зафиксировать транзакцию: ", err)
+		return &result, global.ErrInternalError
 	}
 
 	result.Done = true

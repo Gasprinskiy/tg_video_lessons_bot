@@ -5,7 +5,7 @@ FROM golang:1.24-alpine AS builder
 
 # # Установка переменной окружения для таймзоны (опционально)
 # RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
+nan
 WORKDIR /app
 COPY . .
 

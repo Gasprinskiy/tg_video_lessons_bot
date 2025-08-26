@@ -4,8 +4,10 @@ import (
 	"context"
 	"tg_video_lessons_bot/config"
 	"tg_video_lessons_bot/internal/entity/global"
+	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/rimport"
 	"tg_video_lessons_bot/tools/logger"
+	"time"
 
 	"github.com/go-telegram/bot"
 	"github.com/sirupsen/logrus"
@@ -48,6 +50,11 @@ func (u *KickerUsecase) KickUsersByTGIDList(ctx context.Context, idList []int64)
 		if err != nil {
 			errCount += 1
 			u.log.Db.WithFields(lf).Errorln("не удалось кикнуть пользователя")
+		}
+
+		if err = u.ri.Repository.Profile.SetPurchaseKickTimeByTGID(transaction.MustGetSession(ctx), time.Now(), tgID); err != nil {
+			errCount += 1
+			u.log.Db.WithFields(lf).Errorln("не удалось обновить запись в базе у пользователя")
 		}
 	}
 

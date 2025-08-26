@@ -50,6 +50,8 @@ func (h NotifyMessageGrpcHandler) SendInviteLink(ctx context.Context, request *n
 		return &reply, global.ErrInternalError
 	}
 
+	defer ts.Rollback()
+
 	replyMessage, err := h.ui.NotifyMessage.CreateChanelInviteLinkMessage(ctx, request.TgId)
 	if err != nil {
 		return &reply, global.ErrInternalError

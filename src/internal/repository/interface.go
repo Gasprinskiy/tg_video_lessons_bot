@@ -4,6 +4,7 @@ import (
 	"context"
 	"tg_video_lessons_bot/internal/entity/profile"
 	"tg_video_lessons_bot/internal/transaction"
+	"time"
 )
 
 type UserCache interface {
@@ -25,4 +26,5 @@ type Profile interface {
 	MarkUserToRegiserAsRegistered(ts transaction.Session, ID int64) error
 	FindUserByTGID(ts transaction.Session, ID int64) (profile.User, error)
 	LoadAllActiveUserIDS(ts transaction.Session) ([]int64, error)
+	SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, tgID int64) error
 }

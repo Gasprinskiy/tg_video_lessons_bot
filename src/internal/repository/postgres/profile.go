@@ -5,6 +5,7 @@ import (
 	"tg_video_lessons_bot/internal/repository"
 	"tg_video_lessons_bot/internal/transaction"
 	"tg_video_lessons_bot/tools/sql_gen"
+	"time"
 )
 
 type profileRepo struct{}
@@ -112,4 +113,16 @@ func (r *profileRepo) LoadAllActiveUserIDS(ts transaction.Session) ([]int64, err
 	`
 
 	return sql_gen.Select[int64](SqlxTx(ts), sqlQuery)
+}
+
+func (r *profileRepo) SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, tgID int64) error {
+	sqlQuery := `
+	UPDATE
+		bot_users_purchases
+	SET kick_time = $1
+		WHERE u_id = (SELECT u_id FROM bot_users_profile WHERE tg_id = $2)
+	`
+
+	_, err := SqlxTx(ts).Exec(sqlQuery, date, tgID)
+	return err
 }
