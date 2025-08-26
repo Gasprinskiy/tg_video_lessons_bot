@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"tg_video_lessons_bot/internal/entity/profile"
+	"tg_video_lessons_bot/internal/entity/subscritions"
 	"tg_video_lessons_bot/internal/transaction"
 	"time"
 )
@@ -27,4 +28,8 @@ type Profile interface {
 	FindUserByTGID(ts transaction.Session, ID int64) (profile.User, error)
 	LoadAllActiveUserIDS(ts transaction.Session) ([]int64, error)
 	SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, tgID int64) error
+}
+
+type Subscritions interface {
+	LoadSubscritionsList(ts transaction.Session) ([]subscritions.Subscrition, error)
 }

@@ -1,8 +1,10 @@
 package payment
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strings"
+	"tg_video_lessons_bot/internal/entity/contact"
 )
 
 type PaymentMethodName string
@@ -12,10 +14,53 @@ const (
 	PaymentMethodNameClick PaymentMethodName = "Click"
 )
 
-var PaymentMethodWithPrefix = func(name PaymentMethodName) string {
-	return fmt.Sprintf("pay_method:%s", strings.ToLower(string(name)))
+func (pm PaymentMethodName) GeneratePayLink(merchantID, orderID string, amount int64, botUserName string, isDev bool) string {
+	if pm == PaymentMethodNamePayme {
+		return pm.generatePaymeLink(merchantID, orderID, amount, botUserName, isDev)
+	}
+
+	return "https://google.com"
 }
 
+func (pm PaymentMethodName) generatePaymeLink(merchantID, orderID string, amount int64, botUserName string, isDev bool) string {
+	data := fmt.Sprintf(
+		"m=%s;ac.order_id=%s;a=%d;c=%s",
+		merchantID,
+		orderID,
+		amount,
+		contact.CreateUserLinkByUsername(botUserName),
+	)
+
+	// кодируем в base64
+	encoded := base64.StdEncoding.EncodeToString([]byte(data))
+
+	// выбираем URL (боевой или тестовый)
+	baseURL := "https://checkout.paycom.uz/"
+	if isDev {
+		baseURL = "https://test.paycom.uz/"
+	}
+
+	return baseURL + encoded
+}
+
+var (
+	PickSubTypePrefix = "sub_type"
+	PickMethodPrefix  = "pay_method"
+)
+
+var (
+	SubscritionTypeName = func(term int, price float64) string {
+		return fmt.Sprintf("%d oy %d so‘m", term, int(price))
+	}
+	SubscritionTypePrefix = func(subID int, price float64) string {
+		return fmt.Sprintf("%s:%d:%f", PickSubTypePrefix, subID, price)
+	}
+	PaymentMethodWithPrefix = func(name PaymentMethodName, subID int, price float64) string {
+		return fmt.Sprintf("%s:%s:%d:%f", PickMethodPrefix, strings.ToLower(string(name)), subID, price)
+	}
+)
+
 const (
-	PickPaymentMethodMessage = "O‘zingiz to‘lov qiling yoki admin bilan bog‘laning"
+	PickPaymentMethodMessage   = "O‘zingiz to‘lov qiling yoki admin bilan bog‘laning"
+	PickSubscritionTypeMessage = "Obuna turini tanlang"
 )

@@ -13,6 +13,7 @@ type Config struct {
 	PostgresURL      string
 	BotToken         string
 	BotChanelID      int
+	BotUserName      string
 	BotAdminUsername string
 	RedisAddr        string
 	RedisPass        string
@@ -38,6 +39,7 @@ func NewConfig() *Config {
 		BotChanelID:      botChanelID,
 		BotAdminUsername: os.Getenv("BOT_ADMIN_USERNAME"),
 		RedisPass:        os.Getenv("REDIS_PASSWORD"),
+		BotUserName:      os.Getenv("BOT_USERNAME"),
 		RedisAddr:        fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
 		RedisTtl:         time.Minute * time.Duration(redisTtl),
 		GrpcPort:         fmt.Sprintf(":%s", os.Getenv("GRPC_PORT")),
