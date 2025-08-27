@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"tg_video_lessons_bot/config"
@@ -154,6 +155,8 @@ func (u *Payment) CreatePaymentBill(ctx context.Context, queryData string, ID in
 		u.log.Db.WithFields(lf).Errorln("ошибка при сохранении временного id чека:", err)
 		return message, global.ErrInternalError
 	}
+
+	fmt.Println("tempId: ", tempId)
 
 	message = global.NewInlineKeyboardMessage(
 		payment.PaymentLinkMessage,

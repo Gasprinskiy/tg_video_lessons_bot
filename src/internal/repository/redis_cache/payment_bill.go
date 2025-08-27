@@ -18,5 +18,5 @@ func NewPaymentBillCache(db *redis.Client, ttl time.Duration) repository.Payment
 }
 
 func (r *paymentBillCache) SetPaymentBill(ctx context.Context, ID string) error {
-	return r.db.Set(ctx, ID, true, 0).Err()
+	return r.db.Set(ctx, ID, true, r.ttl).Err()
 }
