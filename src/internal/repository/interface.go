@@ -19,6 +19,10 @@ type UserCache interface {
 	DeleteTempUserData(ctx context.Context, ID int64) error
 }
 
+type PaymentBillCache interface {
+	SetPaymentBill(ctx context.Context, ID string) error
+}
+
 type Profile interface {
 	CreateNewUser(ts transaction.Session, user profile.User) error
 	SaveUserToRegiser(ts transaction.Session, user profile.UserToRegister) error

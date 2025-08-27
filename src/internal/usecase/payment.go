@@ -150,6 +150,10 @@ func (u *Payment) CreatePaymentBill(ctx context.Context, queryData string, ID in
 	}
 
 	tempId := uuid.NewString()
+	if err := u.ri.PaymentBillCache.SetPaymentBill(ctx, tempId); err != nil {
+		u.log.Db.WithFields(lf).Errorln("ошибка при сохранении временного id чека:", err)
+		return message, global.ErrInternalError
+	}
 
 	message = global.NewInlineKeyboardMessage(
 		payment.PaymentLinkMessage,
@@ -157,7 +161,15 @@ func (u *Payment) CreatePaymentBill(ctx context.Context, queryData string, ID in
 			{
 				{
 					Text: payment.PaymnetLinkButton,
-					URL:  paymentType.GeneratePayLink("321sad", tempId, int(subId), price, u.conf.BotUserName, u.conf.IsDev),
+					URL: paymentType.GeneratePayLink(
+						"321sad",
+						tempId,
+						ID,
+						int(subId),
+						price,
+						u.conf.BotUserName,
+						u.conf.IsDev,
+					),
 				},
 			},
 		},

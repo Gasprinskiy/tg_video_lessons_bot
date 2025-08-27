@@ -18,6 +18,7 @@ type Config struct {
 	RedisAddr        string
 	RedisPass        string
 	RedisTtl         time.Duration
+	RedisPaymentTtl  time.Duration
 	GrpcPort         string
 	IsDev            bool
 }
@@ -27,6 +28,11 @@ func NewConfig() *Config {
 	redisTtl, err := strconv.Atoi(os.Getenv("REDIS_TTL"))
 	if err != nil {
 		log.Panic("не удалось получить время жизни кеша: ", err)
+	}
+
+	redisPaymentTtl, err := strconv.Atoi(os.Getenv("REDIS_PAYMENT_TTL"))
+	if err != nil {
+		log.Panic("не удалось получить время жизни кеша платежных чеков: ", err)
 	}
 
 	botChanelID, err := strconv.Atoi(os.Getenv("BOT_CHANEL_ID"))
@@ -48,6 +54,7 @@ func NewConfig() *Config {
 		BotUserName:      os.Getenv("BOT_USERNAME"),
 		RedisAddr:        fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
 		RedisTtl:         time.Minute * time.Duration(redisTtl),
+		RedisPaymentTtl:  time.Minute * time.Duration(redisPaymentTtl),
 		GrpcPort:         fmt.Sprintf(":%s", os.Getenv("GRPC_PORT")),
 		IsDev:            isDev,
 	}

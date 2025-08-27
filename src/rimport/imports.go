@@ -15,9 +15,10 @@ type RepositoryImports struct {
 func NewRepositoryImports(config *config.Config, rdb *redis.Client) *RepositoryImports {
 	return &RepositoryImports{
 		Repository: Repository{
-			UserCache:    redis_cache.NewUserCache(rdb, config.RedisTtl),
-			Profile:      postgres.NewProfile(),
-			Subscritions: postgres.NewSubscritions(),
+			UserCache:        redis_cache.NewUserCache(rdb, config.RedisTtl),
+			PaymentBillCache: redis_cache.NewPaymentBillCache(rdb, config.RedisTtl),
+			Profile:          postgres.NewProfile(),
+			Subscritions:     postgres.NewSubscritions(),
 		},
 	}
 }
