@@ -23,7 +23,7 @@ func (pm PaymentMethodName) GeneratePayLink(merchantID, tempID string, tgID int6
 
 func (pm PaymentMethodName) generatePaymeLink(merchantID, tempID string, tgID int64, subID int, amount float64, botUserName string, isDev bool) string {
 	data := fmt.Sprintf(
-		"m=%s;ac.temp_id=%s;ac.sub_id=%d;ac.u_id=%d;a=%f;c=%s",
+		"m=%s;ac.temp_id=%s;ac.sub_id=%d;ac.tg_id=%d;a=%f;c=%s",
 		merchantID,
 		tempID,
 		subID,
