@@ -19,6 +19,7 @@ type Config struct {
 	RedisPass        string
 	RedisTtl         time.Duration
 	GrpcPort         string
+	IsDev            bool
 }
 
 // NewConfig загружает переменные из .env и возвращает структуру Config
@@ -33,6 +34,11 @@ func NewConfig() *Config {
 		log.Panic("не удалось id платного канала: ", err)
 	}
 
+	isDev, err := strconv.ParseBool(os.Getenv("IS_DEV"))
+	if err != nil {
+		isDev = false
+	}
+
 	return &Config{
 		PostgresURL:      os.Getenv("POSTGRES_URL"),
 		BotToken:         os.Getenv("BOT_TOKEN"),
@@ -43,5 +49,6 @@ func NewConfig() *Config {
 		RedisAddr:        fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
 		RedisTtl:         time.Minute * time.Duration(redisTtl),
 		GrpcPort:         fmt.Sprintf(":%s", os.Getenv("GRPC_PORT")),
+		IsDev:            isDev,
 	}
 }

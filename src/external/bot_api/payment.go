@@ -42,7 +42,7 @@ func NewPayemntBotApi(
 		bot.HandlerTypeMessageText,
 		global.TextCommandBuySub,
 		bot.MatchTypeExact,
-		api.HandlePaymentMethods,
+		api.HandleBuySubscription,
 		// middleware
 		api.m.IsRegsitered,
 	)
@@ -51,13 +51,22 @@ func NewPayemntBotApi(
 		bot.HandlerTypeCallbackQueryData,
 		payment.PickSubTypePrefix,
 		bot.MatchTypePrefix,
-		api.HandlePaymentMethods,
+		api.HandleSubscriptionType,
+		// middleware
+		api.m.IsRegsitered,
+	)
+
+	api.b.RegisterHandler(
+		bot.HandlerTypeCallbackQueryData,
+		payment.PickMethodPrefix,
+		bot.MatchTypePrefix,
+		api.HandlePaymentType,
 		// middleware
 		api.m.IsRegsitered,
 	)
 }
 
-func (h *PayemntBotApi) HandlePaymentMethods(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *PayemntBotApi) HandleBuySubscription(ctx context.Context, b *bot.Bot, update *models.Update) {
 	lf := logrus.Fields{
 		"tg_id": update.Message.From.ID,
 	}
@@ -77,6 +86,46 @@ func (h *PayemntBotApi) HandlePaymentMethods(ctx context.Context, b *bot.Bot, up
 		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
 		return
 	}
+
+	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
+}
+
+func (h *PayemntBotApi) HandleSubscriptionType(ctx context.Context, b *bot.Bot, update *models.Update) {
+	message, err := h.ui.Payment.CreatePaymentTypesMessage(update.CallbackQuery.Data, update.CallbackQuery.From.ID)
+	if err != nil {
+		bot_tool.SendHTMLParseModeMessageDeleteMessage(ctx, b, update, global.MessagesByError[err])
+		return
+	}
+
+	b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+		CallbackQueryID: update.CallbackQuery.ID,
+		Text:            message.CallbackQueryAnswerMessage,
+	})
+
+	b.DeleteMessage(ctx, &bot.DeleteMessageParams{
+		ChatID:    update.CallbackQuery.From.ID,
+		MessageID: update.CallbackQuery.Message.Message.ID,
+	})
+
+	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
+}
+
+func (h *PayemntBotApi) HandlePaymentType(ctx context.Context, b *bot.Bot, update *models.Update) {
+	message, err := h.ui.Payment.CreatePaymentBill(ctx, update.CallbackQuery.Data, update.CallbackQuery.From.ID)
+	if err != nil {
+		bot_tool.SendHTMLParseModeMessageDeleteMessage(ctx, b, update, global.MessagesByError[err])
+		return
+	}
+
+	b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+		CallbackQueryID: update.CallbackQuery.ID,
+		Text:            message.CallbackQueryAnswerMessage,
+	})
+
+	b.DeleteMessage(ctx, &bot.DeleteMessageParams{
+		ChatID:    update.CallbackQuery.From.ID,
+		MessageID: update.CallbackQuery.Message.Message.ID,
+	})
 
 	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
 }

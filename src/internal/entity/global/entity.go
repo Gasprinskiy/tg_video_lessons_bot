@@ -15,8 +15,9 @@ func NewReplyMessage(message string, buttonList [][]models.KeyboardButton) Reply
 }
 
 type InlineKeyboardMessage struct {
-	Message    string
-	ButtonList [][]models.InlineKeyboardButton
+	Message                    string
+	ButtonList                 [][]models.InlineKeyboardButton
+	CallbackQueryAnswerMessage string
 }
 
 func NewInlineKeyboardMessage(message string, buttonList [][]models.InlineKeyboardButton) InlineKeyboardMessage {

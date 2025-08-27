@@ -14,8 +14,55 @@ func SendHTMLParseModeMessage(
 	update *models.Update,
 	message string,
 ) {
+	var ID int64
+
+	if update.CallbackQuery != nil {
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "🔴",
+		})
+		ID = update.CallbackQuery.From.ID
+	} else {
+		ID = update.Message.From.ID
+	}
+
 	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:    update.Message.Chat.ID,
+		ChatID:    ID,
+		Text:      message,
+		ParseMode: "HTML",
+	})
+}
+
+func SendHTMLParseModeMessageDeleteMessage(
+	ctx context.Context,
+	b *bot.Bot,
+	update *models.Update,
+	message string,
+) {
+	var (
+		fromID    int64
+		messageID int
+	)
+
+	if update.CallbackQuery != nil {
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "🔴",
+		})
+		fromID = update.CallbackQuery.From.ID
+		messageID = update.CallbackQuery.Message.Message.ID
+	} else {
+		fromID = update.Message.From.ID
+		messageID = update.Message.ID
+	}
+
+	b.DeleteMessage(ctx, &bot.DeleteMessageParams{
+		ChatID:    fromID,
+		MessageID: messageID,
+	})
+
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:    fromID,
 		Text:      message,
 		ParseMode: "HTML",
 	})
@@ -45,11 +92,20 @@ func SendInlineKeyboardMarkupMessage(
 	update *models.Update,
 	replyMessage global.InlineKeyboardMessage,
 ) {
+	var ID int64
+
+	if update.CallbackQuery != nil {
+		ID = update.CallbackQuery.From.ID
+	} else {
+		ID = update.Message.From.ID
+	}
+
 	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
+		ChatID: ID,
 		Text:   replyMessage.Message,
 		ReplyMarkup: &models.InlineKeyboardMarkup{
 			InlineKeyboard: replyMessage.ButtonList,
 		},
 	})
+
 }

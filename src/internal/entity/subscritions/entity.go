@@ -5,3 +5,7 @@ type Subscrition struct {
 	TermInMonth int     `db:"term_in_month"`
 	Price       float64 `db:"price"`
 }
+
+func (s Subscrition) PriceInCents() float64 {
+	return s.Price * 100
+}
