@@ -102,12 +102,12 @@ func (h *PayemntBotApi) HandleSubscriptionType(ctx context.Context, b *bot.Bot, 
 		Text:            message.CallbackQueryAnswerMessage,
 	})
 
+	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
+
 	b.DeleteMessage(ctx, &bot.DeleteMessageParams{
 		ChatID:    update.CallbackQuery.From.ID,
 		MessageID: update.CallbackQuery.Message.Message.ID,
 	})
-
-	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
 }
 
 func (h *PayemntBotApi) HandlePaymentType(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -122,10 +122,10 @@ func (h *PayemntBotApi) HandlePaymentType(ctx context.Context, b *bot.Bot, updat
 		Text:            message.CallbackQueryAnswerMessage,
 	})
 
+	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
+
 	b.DeleteMessage(ctx, &bot.DeleteMessageParams{
 		ChatID:    update.CallbackQuery.From.ID,
 		MessageID: update.CallbackQuery.Message.Message.ID,
 	})
-
-	bot_tool.SendInlineKeyboardMarkupMessage(ctx, h.b, update, message)
 }

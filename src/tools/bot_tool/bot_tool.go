@@ -56,15 +56,15 @@ func SendHTMLParseModeMessageDeleteMessage(
 		messageID = update.Message.ID
 	}
 
-	b.DeleteMessage(ctx, &bot.DeleteMessageParams{
-		ChatID:    fromID,
-		MessageID: messageID,
-	})
-
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:    fromID,
 		Text:      message,
 		ParseMode: "HTML",
+	})
+
+	b.DeleteMessage(ctx, &bot.DeleteMessageParams{
+		ChatID:    fromID,
+		MessageID: messageID,
 	})
 }
 
