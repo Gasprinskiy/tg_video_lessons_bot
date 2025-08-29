@@ -19,6 +19,7 @@ type Config struct {
 	RedisPass        string
 	RedisTtl         time.Duration
 	RedisPaymentTtl  time.Duration
+	PaymeMerchantID  string
 	GrpcPort         string
 	IsDev            bool
 }
@@ -52,6 +53,7 @@ func NewConfig() *Config {
 		BotAdminUsername: os.Getenv("BOT_ADMIN_USERNAME"),
 		RedisPass:        os.Getenv("REDIS_PASSWORD"),
 		BotUserName:      os.Getenv("BOT_USERNAME"),
+		PaymeMerchantID:  os.Getenv("PAYME_MERHCANT_ID"),
 		RedisAddr:        fmt.Sprintf("redis:%s", os.Getenv("REDIS_PORT")),
 		RedisTtl:         time.Minute * time.Duration(redisTtl),
 		RedisPaymentTtl:  time.Minute * time.Duration(redisPaymentTtl),

@@ -13,21 +13,19 @@ const (
 	PaymentMethodNameClick PaymentMethodName = "Click"
 )
 
-func (pm PaymentMethodName) GeneratePayLink(merchantID, tempID string, tgID int64, subID int, amount float64, botUserName string, isDev bool) string {
+func (pm PaymentMethodName) GeneratePayLink(merchantID, tempID string, amount float64, botUserName string, isDev bool) string {
 	if pm == PaymentMethodNamePayme {
-		return pm.generatePaymeLink(merchantID, tempID, tgID, subID, amount, botUserName, isDev)
+		return pm.generatePaymeLink(merchantID, tempID, amount, botUserName, isDev)
 	}
 
 	return "https://google.com"
 }
 
-func (pm PaymentMethodName) generatePaymeLink(merchantID, tempID string, tgID int64, subID int, amount float64, botUserName string, isDev bool) string {
+func (pm PaymentMethodName) generatePaymeLink(merchantID, tempID string, amount float64, botUserName string, isDev bool) string {
 	data := fmt.Sprintf(
-		"m=%s;ac.temp_id=%s;ac.sub_id=%d;ac.tg_id=%d;a=%f;c=%s",
+		"m=%s;ac.order_id=%s;a=%f;c=%s",
 		merchantID,
 		tempID,
-		subID,
-		tgID,
 		amount,
 		contact.CreateUserLinkByUsername(botUserName),
 	)

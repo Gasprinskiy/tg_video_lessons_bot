@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"tg_video_lessons_bot/internal/entity/payment"
 	"tg_video_lessons_bot/internal/entity/profile"
 	"tg_video_lessons_bot/internal/entity/subscritions"
 	"tg_video_lessons_bot/internal/transaction"
@@ -20,7 +21,7 @@ type UserCache interface {
 }
 
 type PaymentBillCache interface {
-	SetPaymentBill(ctx context.Context, ID string) error
+	SetPaymentBill(ctx context.Context, id string, bill payment.Bill) error
 }
 
 type Profile interface {

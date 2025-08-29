@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 	"tg_video_lessons_bot/config"
@@ -151,12 +150,10 @@ func (u *Payment) CreatePaymentBill(ctx context.Context, queryData string, ID in
 	}
 
 	tempId := uuid.NewString()
-	if err := u.ri.PaymentBillCache.SetPaymentBill(ctx, tempId); err != nil {
+	if err := u.ri.PaymentBillCache.SetPaymentBill(ctx, tempId, payment.NewBill(ID, price, int(subId))); err != nil {
 		u.log.Db.WithFields(lf).Errorln("ошибка при сохранении временного id чека:", err)
 		return message, global.ErrInternalError
 	}
-
-	fmt.Println("tempId: ", tempId)
 
 	message = global.NewInlineKeyboardMessage(
 		payment.PaymentLinkMessage,
@@ -165,10 +162,8 @@ func (u *Payment) CreatePaymentBill(ctx context.Context, queryData string, ID in
 				{
 					Text: payment.PaymnetLinkButton,
 					URL: paymentType.GeneratePayLink(
-						"321sad",
+						u.conf.PaymeMerchantID,
 						tempId,
-						ID,
-						int(subId),
 						price,
 						u.conf.BotUserName,
 						u.conf.IsDev,
