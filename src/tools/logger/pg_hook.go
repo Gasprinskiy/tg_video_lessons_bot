@@ -28,10 +28,7 @@ func (hook *PostgresHook) Fire(entry *logrus.Entry) error {
 	data := entry.Data
 
 	// Выделяем tg_id
-	tgIDValue, ok := data["tg_id"]
-	if !ok {
-		return fmt.Errorf("tg_id отсутствует в логах")
-	}
+	tgIDValue := data["tg_id"]
 
 	var tgID int64
 	switch v := tgIDValue.(type) {
@@ -42,7 +39,7 @@ func (hook *PostgresHook) Fire(entry *logrus.Entry) error {
 	case float64:
 		tgID = int64(v)
 	default:
-		return fmt.Errorf("tg_id имеет неподдерживаемый тип: %T", tgIDValue)
+		tgID = 0
 	}
 
 	// Копируем всё кроме tg_id в additional_fields

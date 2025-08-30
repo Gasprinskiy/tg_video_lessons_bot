@@ -97,9 +97,8 @@ func (u *KickerUsecase) KickUsersByTGIDList(ctx context.Context, list []*kicker.
 		}
 
 		_, err = u.b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    row.TgId,
-			Text:      fmt.Sprintf(kickMessage, userToKick.FirstName, global.TextCommandBuySub),
-			ParseMode: "HTML",
+			ChatID: row.TgId,
+			Text:   fmt.Sprintf(kickMessage, userToKick.FirstName, global.TextCommandBuySub),
 		})
 		if err != nil {
 			u.log.Db.WithFields(lf).Warningln("не удалось отправить сообщение с причиной кика:", err)

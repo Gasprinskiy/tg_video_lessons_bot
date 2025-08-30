@@ -49,6 +49,33 @@ func SelectNamed[T any](tx *sqlx.Tx, sqlQuery string, params map[string]any) ([]
 	return data, HandleError(err)
 }
 
+func SelectNamedIn[T any](tx *sqlx.Tx, sqlQuery string, params map[string]any) ([]T, error) {
+	data := make([]T, 0)
+
+	query, args, err := sqlx.Named(sqlQuery, params)
+	if err != nil {
+		return nil, err
+	}
+
+	query, args, err = sqlx.In(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	query = tx.Rebind(query)
+
+	err = tx.Select(&data, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		err = sql.ErrNoRows
+	}
+
+	return data, HandleError(err)
+}
+
 func HandleError(err error) error {
 	if err == sql.ErrNoRows {
 		return global.ErrNoData

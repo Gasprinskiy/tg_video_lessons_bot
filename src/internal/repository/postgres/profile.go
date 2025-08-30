@@ -137,16 +137,12 @@ func (r *profileRepo) BulkSearchUsersByTGID(ts transaction.Session, tgIDList []i
 			up.tg_user_name,
 			up.birth_date,
 			up.phone_number,
-			up.register_date,
-			p.p_id IS NOT NULL as has_purchases,
-			p.p_time,
-			p.term_in_month
+			up.register_date
 		FROM bot_users_profile up
-			LEFT JOIN purchase p ON (p.u_id = up.u_id)
 		WHERE up.tg_id IN (:TG_ID_LIST)
 	`
 
-	return sql_gen.SelectNamed[profile.User](SqlxTx(ts), sqlQuery, map[string]any{
+	return sql_gen.SelectNamedIn[profile.User](SqlxTx(ts), sqlQuery, map[string]any{
 		"TG_ID_LIST": tgIDList,
 	})
 }
