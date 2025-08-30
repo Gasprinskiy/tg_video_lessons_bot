@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	KickerService_KickExpiredSubsUsers_FullMethodName = "/kicker_proto.KickerService/KickExpiredSubsUsers"
+	KickerService_KickUsers_FullMethodName = "/kicker_proto.KickerService/KickUsers"
 )
 
 // KickerServiceClient is the client API for KickerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KickerServiceClient interface {
-	KickExpiredSubsUsers(ctx context.Context, in *KickExpiredSubsUsersRequest, opts ...grpc.CallOption) (*KickExpiredSubsUsersReply, error)
+	KickUsers(ctx context.Context, in *KickUsersRequest, opts ...grpc.CallOption) (*KickExpiredSubsUsersReply, error)
 }
 
 type kickerServiceClient struct {
@@ -37,10 +37,10 @@ func NewKickerServiceClient(cc grpc.ClientConnInterface) KickerServiceClient {
 	return &kickerServiceClient{cc}
 }
 
-func (c *kickerServiceClient) KickExpiredSubsUsers(ctx context.Context, in *KickExpiredSubsUsersRequest, opts ...grpc.CallOption) (*KickExpiredSubsUsersReply, error) {
+func (c *kickerServiceClient) KickUsers(ctx context.Context, in *KickUsersRequest, opts ...grpc.CallOption) (*KickExpiredSubsUsersReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(KickExpiredSubsUsersReply)
-	err := c.cc.Invoke(ctx, KickerService_KickExpiredSubsUsers_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, KickerService_KickUsers_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *kickerServiceClient) KickExpiredSubsUsers(ctx context.Context, in *Kick
 // All implementations must embed UnimplementedKickerServiceServer
 // for forward compatibility.
 type KickerServiceServer interface {
-	KickExpiredSubsUsers(context.Context, *KickExpiredSubsUsersRequest) (*KickExpiredSubsUsersReply, error)
+	KickUsers(context.Context, *KickUsersRequest) (*KickExpiredSubsUsersReply, error)
 	mustEmbedUnimplementedKickerServiceServer()
 }
 
@@ -62,8 +62,8 @@ type KickerServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedKickerServiceServer struct{}
 
-func (UnimplementedKickerServiceServer) KickExpiredSubsUsers(context.Context, *KickExpiredSubsUsersRequest) (*KickExpiredSubsUsersReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method KickExpiredSubsUsers not implemented")
+func (UnimplementedKickerServiceServer) KickUsers(context.Context, *KickUsersRequest) (*KickExpiredSubsUsersReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method KickUsers not implemented")
 }
 func (UnimplementedKickerServiceServer) mustEmbedUnimplementedKickerServiceServer() {}
 func (UnimplementedKickerServiceServer) testEmbeddedByValue()                       {}
@@ -86,20 +86,20 @@ func RegisterKickerServiceServer(s grpc.ServiceRegistrar, srv KickerServiceServe
 	s.RegisterService(&KickerService_ServiceDesc, srv)
 }
 
-func _KickerService_KickExpiredSubsUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KickExpiredSubsUsersRequest)
+func _KickerService_KickUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KickUsersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(KickerServiceServer).KickExpiredSubsUsers(ctx, in)
+		return srv.(KickerServiceServer).KickUsers(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: KickerService_KickExpiredSubsUsers_FullMethodName,
+		FullMethod: KickerService_KickUsers_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(KickerServiceServer).KickExpiredSubsUsers(ctx, req.(*KickExpiredSubsUsersRequest))
+		return srv.(KickerServiceServer).KickUsers(ctx, req.(*KickUsersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -112,8 +112,8 @@ var KickerService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*KickerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "KickExpiredSubsUsers",
-			Handler:    _KickerService_KickExpiredSubsUsers_Handler,
+			MethodName: "KickUsers",
+			Handler:    _KickerService_KickUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -4,11 +4,16 @@ package kicker_proto;
 option go_package = "./kicker";
 
 service KickerService {
-  rpc KickExpiredSubsUsers(KickExpiredSubsUsersRequest) returns (KickExpiredSubsUsersReply);
+  rpc KickUsers(KickUsersRequest) returns (KickExpiredSubsUsersReply);
 }
 
-message KickExpiredSubsUsersRequest {
-  repeated int64 tg_ids = 1;
+message KickUserParam {
+  int64 tg_id = 1;
+  int64 reason_id = 2;
+}
+
+message KickUsersRequest {
+  repeated KickUserParam params = 1;
 }
 
 message KickExpiredSubsUsersReply {

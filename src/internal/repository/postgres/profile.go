@@ -115,14 +115,38 @@ func (r *profileRepo) LoadAllActiveUserIDS(ts transaction.Session) ([]int64, err
 	return sql_gen.Select[int64](SqlxTx(ts), sqlQuery)
 }
 
-func (r *profileRepo) SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, tgID int64) error {
+func (r *profileRepo) SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, uid int) error {
 	sqlQuery := `
 	UPDATE
 		bot_users_purchases
 	SET kick_time = $1
-		WHERE u_id = (SELECT u_id FROM bot_users_profile WHERE tg_id = $2)
+		WHERE u_id = $2
 	`
 
-	_, err := SqlxTx(ts).Exec(sqlQuery, date, tgID)
+	_, err := SqlxTx(ts).Exec(sqlQuery, date, uid)
 	return err
+}
+
+func (r *profileRepo) BulkSearchUsersByTGID(ts transaction.Session, tgIDList []int64) ([]profile.User, error) {
+	sqlQuery := `
+		SELECT
+			up.u_id,
+			up.tg_id,
+			up.first_name,
+			up.last_name,
+			up.tg_user_name,
+			up.birth_date,
+			up.phone_number,
+			up.register_date,
+			p.p_id IS NOT NULL as has_purchases,
+			p.p_time,
+			p.term_in_month
+		FROM bot_users_profile up
+			LEFT JOIN purchase p ON (p.u_id = up.u_id)
+		WHERE up.tg_id IN (:TG_ID_LIST)
+	`
+
+	return sql_gen.SelectNamed[profile.User](SqlxTx(ts), sqlQuery, map[string]any{
+		"TG_ID_LIST": tgIDList,
+	})
 }

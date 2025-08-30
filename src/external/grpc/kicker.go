@@ -33,7 +33,7 @@ func NewKickerGrpcHandler(
 	}
 }
 
-func (h *KickerGrpcHandler) KickExpiredSubsUsers(ctx context.Context, param *kicker.KickExpiredSubsUsersRequest) (*kicker.KickExpiredSubsUsersReply, error) {
+func (h *KickerGrpcHandler) KickUsers(ctx context.Context, param *kicker.KickUsersRequest) (*kicker.KickExpiredSubsUsersReply, error) {
 	var result kicker.KickExpiredSubsUsersReply
 
 	ts := h.sm.CreateSession()
@@ -46,7 +46,7 @@ func (h *KickerGrpcHandler) KickExpiredSubsUsers(ctx context.Context, param *kic
 
 	defer ts.Rollback()
 
-	err := h.ui.Kicker.KickUsersByTGIDList(ctx, param.TgIds)
+	err := h.ui.Kicker.KickUsersByTGIDList(ctx, param.Params)
 	if err != nil {
 		return &result, err
 	}

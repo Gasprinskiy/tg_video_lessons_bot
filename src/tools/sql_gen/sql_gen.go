@@ -28,6 +28,27 @@ func Select[T any](tx *sqlx.Tx, sqlQuery string, params ...any) ([]T, error) {
 	return data, HandleError(err)
 }
 
+func SelectNamed[T any](tx *sqlx.Tx, sqlQuery string, params map[string]any) ([]T, error) {
+	data := make([]T, 0)
+
+	stmt, err := tx.PrepareNamed(sqlQuery)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	err = stmt.Select(&data, params)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		err = sql.ErrNoRows
+	}
+
+	return data, HandleError(err)
+}
+
 func HandleError(err error) error {
 	if err == sql.ErrNoRows {
 		return global.ErrNoData
