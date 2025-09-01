@@ -115,15 +115,17 @@ func (r *profileRepo) LoadAllActiveUserIDS(ts transaction.Session) ([]int64, err
 	return sql_gen.Select[int64](SqlxTx(ts), sqlQuery)
 }
 
-func (r *profileRepo) SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, uid int) error {
+func (r *profileRepo) SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, reason, uid int) error {
 	sqlQuery := `
-	UPDATE
-		bot_users_purchases
-	SET kick_time = $1
-		WHERE u_id = $2
+		UPDATE
+			bot_users_purchases
+		SET
+			kick_time = $2,
+			kick_reason = $3
+		WHERE u_id = $1
 	`
 
-	_, err := SqlxTx(ts).Exec(sqlQuery, date, uid)
+	_, err := SqlxTx(ts).Exec(sqlQuery, uid, date, reason)
 	return err
 }
 

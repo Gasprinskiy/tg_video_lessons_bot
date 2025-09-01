@@ -32,7 +32,7 @@ type Profile interface {
 	MarkUserToRegiserAsRegistered(ts transaction.Session, ID int64) error
 	FindUserByTGID(ts transaction.Session, ID int64) (profile.User, error)
 	LoadAllActiveUserIDS(ts transaction.Session) ([]int64, error)
-	SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, uid int) error
+	SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, reason, uid int) error
 	BulkSearchUsersByTGID(ts transaction.Session, tgIDList []int64) ([]profile.User, error)
 }
 

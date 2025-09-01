@@ -85,7 +85,7 @@ func (u *KickerUsecase) KickUsersByTGIDList(ctx context.Context, list []*kicker.
 			u.log.Db.WithFields(lf).Errorln("не удалось кикнуть пользователя")
 		}
 
-		if err = u.ri.Repository.Profile.SetPurchaseKickTimeByTGID(transaction.MustGetSession(ctx), time.Now(), userToKick.UID); err != nil {
+		if err = u.ri.Repository.Profile.SetPurchaseKickTimeByTGID(transaction.MustGetSession(ctx), time.Now(), int(row.ReasonId), userToKick.UID); err != nil {
 			errCount += 1
 			u.log.Db.WithFields(lf).Errorln("не удалось обновить запись в базе у пользователя")
 		}
