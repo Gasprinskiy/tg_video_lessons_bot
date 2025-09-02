@@ -80,6 +80,7 @@ func (r *profileRepo) FindUserByTGID(ts transaction.Session, ID int64) (profile.
 				bp.p_id,
 				bp.u_id,
 				bp.p_time,
+				bp.kick_time,
 				st.term_in_month
 			FROM bot_users_purchases bp
 				JOIN bot_subscription_types st ON (st.sub_id = bp.sub_id)
@@ -147,4 +148,20 @@ func (r *profileRepo) BulkSearchUsersByTGID(ts transaction.Session, tgIDList []i
 	return sql_gen.SelectNamedIn[profile.User](SqlxTx(ts), sqlQuery, map[string]any{
 		"TG_ID_LIST": tgIDList,
 	})
+}
+
+func (r *profileRepo) GetUserLastSubscrition(ts transaction.Session, ID int64) (profile.UserSubscrition, error) {
+	sqlQuery := `
+		SELECT
+			bp.p_time,
+			bp.kick_time,
+			st.term_in_month
+		FROM bot_users_purchases bp
+			JOIN bot_subscription_types st ON (st.sub_id = bp.sub_id)
+		WHERE bp.u_id = (SELECT u.u_id FROM bot_users_profile WHERE u.tg_id = $1)
+		ORDER BY bp.p_id DESC
+		LIMIT 1
+	`
+
+	return sql_gen.Get[profile.UserSubscrition](SqlxTx(ts), sqlQuery, ID)
 }

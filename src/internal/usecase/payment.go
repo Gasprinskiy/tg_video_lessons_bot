@@ -43,10 +43,20 @@ func (u *Payment) logPrefix() string {
 	return "[payment]"
 }
 
-func (u *Payment) CreatePickSubsTypeMessage(ctx context.Context) (global.InlineKeyboardMessage, error) {
+func (u *Payment) CreatePickSubsTypeMessage(ctx context.Context, ID int64) (global.InlineKeyboardMessage, error) {
 	var message global.InlineKeyboardMessage
 
 	ts := transaction.MustGetSession(ctx)
+
+	lastSub, err := u.ri.Profile.GetUserLastSubscrition(ts, ID)
+	if err != nil && err != global.ErrNoData {
+		u.log.Db.Errorln(u.logPrefix(), "не удалось найти последнюю подписку пользователя", err)
+		return message, global.ErrInternalError
+	}
+
+	if lastSub.IsActive() {
+		return message, payment.ErrAllreadyHasActiveSub
+	}
 
 	subsList, err := u.ri.Subscritions.LoadSubscritionsList(ts)
 	if err != nil {

@@ -21,6 +21,7 @@ type User struct {
 	HasPurchases  bool               `json:"-" db:"has_purchases"`
 	PurchasesTime sql_null.NullTime  `json:"-" db:"p_time"`
 	PurchasesTerm sql_null.NullInt64 `json:"-" db:"term_in_month"`
+	KickTime      sql_null.NullTime  `json:"-" db:"kick_time"`
 }
 
 func (u User) CalcAge() string {
@@ -30,13 +31,17 @@ func (u User) CalcAge() string {
 
 func (u User) PurchasesStatus() string {
 	if u.PurchasesTime.Valid {
+		if u.KickTime.Valid {
+			return "Faol emas"
+		}
+
 		now := chronos.NowTruncUTC()
 
 		subDate := chronos.BeginingOfDate(u.PurchasesTime.Time)
 		expireDate := subDate.AddDate(0, u.PurchasesTerm.GetInt(), 0)
 
 		if now.After(expireDate) {
-			return "Muddati tugadi"
+			return "Faol emas"
 		}
 
 		return fmt.Sprintf("%s %s", expireDate.Format(chronos.DateMask), "gacha faol")
@@ -76,4 +81,14 @@ func NewDefaultUserToRegister(ID int64, userName string, joinDate time.Time) Use
 		Step:     RegisterStepFullName,
 		JoinDate: joinDate,
 	}
+}
+
+type UserSubscrition struct {
+	PurchasesTime sql_null.NullTime  `db:"p_time"`
+	PurchasesTerm sql_null.NullInt64 `db:"term_in_month"`
+	KickTime      sql_null.NullTime  `db:"kick_time"`
+}
+
+func (s UserSubscrition) IsActive() bool {
+	return s.PurchasesTime.Valid && !s.KickTime.Valid
 }

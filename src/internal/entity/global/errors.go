@@ -2,6 +2,7 @@ package global
 
 import (
 	"errors"
+	"tg_video_lessons_bot/internal/entity/payment"
 	"tg_video_lessons_bot/internal/entity/profile"
 )
 
@@ -25,11 +26,12 @@ var (
 // }
 
 var MessagesByError = map[error]string{
-	ErrInternalError:              "Ichki xato paydo bo'ldi, keyinroq urinib ko‘ring yoki qo‘llab-quvvatlash xizmati bilan bog‘laning.",
-	ErrPermissionDenied:           "Rad etdi",
-	profile.ErrFullNameValidation: "Ism va familiya noto‘g‘ri kiritilgan, qaytadan urinib ko‘ring",
-	profile.ErrBirthDateInFuture:  "Tug‘ilgan sana kelajakda bo‘lishi mumkin emas",
-	profile.ErrBirhDateInvalid:    `Tug‘ilgan sana noto‘g‘ri kiritilgan, qaytadan urinib ko‘ring, "KK.OY.YYYY" formatida kiriting`,
-	profile.ErrPhoneNumberEmpty:   "Telefon raqami yuborilmagan yoki noto‘g‘ri yuborilgan, qaytadan urinib ko‘ring",
-	profile.ErrPhoneNumberInvalid: "Telefon raqami noto‘g‘ri kiritilgan, qaytadan urinib ko‘ring",
+	ErrInternalError:                "Ichki xato paydo bo'ldi, keyinroq urinib ko‘ring yoki qo‘llab-quvvatlash xizmati bilan bog‘laning.",
+	ErrPermissionDenied:             "Rad etdi",
+	profile.ErrFullNameValidation:   "Ism va familiya noto‘g‘ri kiritilgan, qaytadan urinib ko‘ring",
+	profile.ErrBirthDateInFuture:    "Tug‘ilgan sana kelajakda bo‘lishi mumkin emas",
+	profile.ErrBirhDateInvalid:      `Tug‘ilgan sana noto‘g‘ri kiritilgan, qaytadan urinib ko‘ring, "KK.OY.YYYY" formatida kiriting`,
+	profile.ErrPhoneNumberEmpty:     "Telefon raqami yuborilmagan yoki noto‘g‘ri yuborilgan, qaytadan urinib ko‘ring",
+	profile.ErrPhoneNumberInvalid:   "Telefon raqami noto‘g‘ri kiritilgan, qaytadan urinib ko‘ring",
+	payment.ErrAllreadyHasActiveSub: "Sizning obunangiz faol",
 }

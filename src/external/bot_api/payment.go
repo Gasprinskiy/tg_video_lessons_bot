@@ -81,7 +81,7 @@ func (h *PayemntBotApi) HandleBuySubscription(ctx context.Context, b *bot.Bot, u
 
 	defer ts.Rollback()
 
-	message, err := h.ui.Payment.CreatePickSubsTypeMessage(ctx)
+	message, err := h.ui.Payment.CreatePickSubsTypeMessage(ctx, update.Message.From.ID)
 	if err != nil {
 		bot_tool.SendHTMLParseModeMessage(ctx, b, update, global.MessagesByError[err])
 		return
