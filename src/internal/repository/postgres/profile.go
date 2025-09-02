@@ -158,7 +158,7 @@ func (r *profileRepo) GetUserLastSubscrition(ts transaction.Session, ID int64) (
 			st.term_in_month
 		FROM bot_users_purchases bp
 			JOIN bot_subscription_types st ON (st.sub_id = bp.sub_id)
-		WHERE bp.u_id = (SELECT u.u_id FROM bot_users_profile WHERE u.tg_id = $1)
+		WHERE bp.u_id = (SELECT u.u_id FROM bot_users_profile u WHERE u.tg_id = $1)
 		ORDER BY bp.p_id DESC
 		LIMIT 1
 	`

@@ -19,9 +19,9 @@ type User struct {
 	JoinDate      time.Time          `json:"join_date" db:"join_date"`
 	RegisterDate  time.Time          `json:"register_date" db:"register_date"`
 	HasPurchases  bool               `json:"-" db:"has_purchases"`
-	PurchasesTime sql_null.NullTime  `json:"-" db:"p_time"`
-	PurchasesTerm sql_null.NullInt64 `json:"-" db:"term_in_month"`
-	KickTime      sql_null.NullTime  `json:"-" db:"kick_time"`
+	PurchasesTime sql_null.NullTime  `json:"p_time" db:"p_time"`
+	PurchasesTerm sql_null.NullInt64 `json:"term_in_month" db:"term_in_month"`
+	KickTime      sql_null.NullTime  `json:"kick_time" db:"kick_time"`
 }
 
 func (u User) CalcAge() string {
