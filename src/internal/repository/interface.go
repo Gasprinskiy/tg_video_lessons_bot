@@ -35,6 +35,7 @@ type Profile interface {
 	SetPurchaseKickTimeByTGID(ts transaction.Session, date time.Time, reason, uid int) error
 	BulkSearchUsersByTGID(ts transaction.Session, tgIDList []int64) ([]profile.User, error)
 	GetUserLastSubscrition(ts transaction.Session, ID int64) (profile.UserSubscrition, error)
+	SetUserBotBannedFlag(ts transaction.Session, ID int64, value bool) error
 }
 
 type Subscritions interface {

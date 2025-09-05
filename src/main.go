@@ -19,6 +19,7 @@ import (
 	"tg_video_lessons_bot/uimport"
 
 	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc"
 
@@ -66,7 +67,24 @@ func main() {
 	sessionManager := transaction.NewSQLSessionManager(pgdb)
 
 	// инициализация бота
-	b, err := bot.New(config.BotToken)
+
+	opts := []bot.Option{
+		bot.WithMiddlewares(
+			func(next bot.HandlerFunc) bot.HandlerFunc {
+				return func(ctx context.Context, b *bot.Bot, update *models.Update) {
+					isBanned := update.MyChatMember.NewChatMember.Type == models.ChatMemberTypeBanned
+					isPrivate := update.MyChatMember.Chat.Type == models.ChatTypePrivate
+					isUserBannedBot := isBanned && isPrivate
+					if isUserBannedBot {
+
+					}
+					next(ctx, b, update)
+				}
+			},
+		),
+	}
+
+	b, err := bot.New(config.BotToken, opts...)
 	if err != nil {
 		log.Panic("ошибка при чтении токена бота: ", err)
 	}
